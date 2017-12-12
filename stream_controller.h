@@ -36,6 +36,17 @@ typedef struct _ChannelInfo
 }ChannelInfo;
 
 /**
+ * @brief Structure that holds initial info
+ */
+typedef struct _InitialInfo
+{
+	uint32_t tuneFrequency;
+	uint32_t tuneBandwidth;
+	uint32_t programNumber;
+	t_Module tuneModul;
+}InitialInfo;
+
+/**
  * @brief Initializes stream controller module
  *
  * @return stream controller error code
