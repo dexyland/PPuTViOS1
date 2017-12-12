@@ -13,6 +13,7 @@
 
 #define DESIRED_FREQUENCY 754000000	        /* Tune frequency in Hz */
 #define BANDWIDTH 8    				        /* Bandwidth in Mhz */
+#define LINE_LENGTH 100						/* Max line length in config file */
 
 /**
  * @brief Structure that defines stream controller error
@@ -69,5 +70,14 @@ StreamControllerError channelDown();
  * @return stream controller error code
  */
 StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
+
+/**
+ * @brief Loads config.ini file holding initial info
+ *
+ * @param [in] filename - name of file to be loaded
+ * @return stream conotroller error code
+ */
+
+StreamControllerError loadConfigFile(char* filename);
 
 #endif /* __STREAM_CONTROLLER_H__ */

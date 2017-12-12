@@ -9,7 +9,6 @@ static RemoteControllerCallback callback = NULL;
 
 RemoteControllerError remoteControllerInit()
 {
-
     /* handle input events in background process*/
     if (pthread_create(&remote, NULL, &inputEventTask, NULL))
     {
@@ -23,6 +22,9 @@ RemoteControllerError remoteControllerInit()
 RemoteControllerError remoteControllerDeinit()
 {
     /* wait for EXIT key press input event*/
+
+	printf("Eto me u deinitu!\n");
+
     threadExit = 1;
     if (pthread_join(remote, NULL))
     {
@@ -41,6 +43,7 @@ RemoteControllerError registerRemoteControllerCallback(RemoteControllerCallback 
 	}
 	else
 	{
+		printf("Remote callback function registered!\n");
 		callback = remoteControllerCallback;
 		return RC_NO_ERROR;
 	}
@@ -49,6 +52,8 @@ RemoteControllerError registerRemoteControllerCallback(RemoteControllerCallback 
 RemoteControllerError unregisterRemoteControllerCallback(RemoteControllerCallback remoteControllerCallback)
 {
 	callback = NULL;
+
+	return RC_NO_ERROR;
 }
 
 void* inputEventTask()
@@ -90,7 +95,7 @@ void* inputEventTask()
 			printf("Event value: %d\n",eventBuf.value);
 			printf("\n");
             
-            callback(eventBuf.type, eventBuf.code, eventBuf.value);
+            callback(eventBuf.code, eventBuf.type, eventBuf.value);
            
 		}
     }

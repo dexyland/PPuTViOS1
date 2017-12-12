@@ -387,3 +387,34 @@ int32_t tunerStatusCallback(t_LockStatus status)
     }
     return 0;
 }
+
+StreamControllerError loadConfigFile(char* filename)
+{
+	FILE* inputFile;
+	char singleLine[LINE_LENGTH];
+	char lineDelimiter[2] = " ";
+	char* singleWord;
+
+	if ((inputFile = fopen(filename, "r") == NULL)
+	{
+		printf("Error opening init file!\n");
+		return SC_ERROR;
+	}
+
+	while (fgets(singleLine, LINE_LENGTH, inputFile) != NULL)
+	{
+		singleWord = strtok(singleLine, lineDelimiter);
+
+		if (singleWord == "frequency")
+	}
+
+
+
+
+
+
+
+
+
+	return SC_NO_ERROR;
+}
