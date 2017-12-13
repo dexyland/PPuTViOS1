@@ -392,7 +392,7 @@ StreamControllerError loadConfigFile(char* filename)
 {
 	FILE* inputFile;
 	char singleLine[LINE_LENGTH];
-	char lineDelimiter[2] = " ";
+	char lineDelimiter[2] = "-";
 	char* singleWord;
 
 	if ((inputFile = fopen(filename, "r") == NULL)
@@ -406,6 +406,9 @@ StreamControllerError loadConfigFile(char* filename)
 		singleWord = strtok(singleLine, lineDelimiter);
 
 		if (singleWord == "frequency")
+		{
+			
+		}
 	}
 
 
