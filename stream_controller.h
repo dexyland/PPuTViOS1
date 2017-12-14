@@ -43,7 +43,7 @@ typedef struct _InitialInfo
 	uint32_t tuneFrequency;
 	uint32_t tuneBandwidth;
 	uint32_t programNumber;
-	t_Module tuneModul;
+	t_Module tuneModule;
 }InitialInfo;
 
 /**
@@ -85,10 +85,8 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 /**
  * @brief Loads config.ini file holding initial info
  *
- * @param [in] filename - name of file to be loaded
  * @return stream conotroller error code
  */
-
-StreamControllerError loadConfigFile(char* filename);
+StreamControllerError loadInitialInfo();
 
 #endif /* __STREAM_CONTROLLER_H__ */

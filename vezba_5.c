@@ -29,6 +29,13 @@ static ChannelInfo channelInfo;
 
 int main()
 {
+	/* load initial info from config.ini file */
+	if (loadInitialInfo())
+	{
+		printf("Initial info required!\n");
+		return -1;
+	}
+
     /* initialize remote controller module */
     ERRORCHECK(remoteControllerInit());
     

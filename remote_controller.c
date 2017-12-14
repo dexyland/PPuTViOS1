@@ -22,9 +22,6 @@ RemoteControllerError remoteControllerInit()
 RemoteControllerError remoteControllerDeinit()
 {
     /* wait for EXIT key press input event*/
-
-	printf("Eto me u deinitu!\n");
-
     threadExit = 1;
     if (pthread_join(remote, NULL))
     {

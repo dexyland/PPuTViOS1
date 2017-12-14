@@ -27,7 +27,10 @@ static pthread_mutex_t demuxMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void* streamControllerTask();
 static void startChannel(int32_t channelNumber);
+static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo);
+static void removeWhiteSpaces(char* string);
 
+InitialInfo configFile;
 
 StreamControllerError streamControllerInit()
 {
@@ -138,7 +141,6 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
  */
 void startChannel(int32_t channelNumber)
 {
-    
     /* free PAT table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
     
@@ -255,7 +257,7 @@ void* streamControllerTask()
 	}
     
     /* lock to frequency */
-    if(!Tuner_Lock_To_Frequency(DESIRED_FREQUENCY, BANDWIDTH, DVB_T))
+    if(!Tuner_Lock_To_Frequency(configFile.tuneFrequency, configFile.tuneBandwidth, configFile.tuneModule))
     {
         printf("\n%s: INFO Tuner_Lock_To_Frequency(): %d Hz - success!\n",__FUNCTION__,DESIRED_FREQUENCY);
     }
@@ -388,14 +390,24 @@ int32_t tunerStatusCallback(t_LockStatus status)
     return 0;
 }
 
-StreamControllerError loadConfigFile(char* filename)
+StreamControllerError loadInitialInfo()
+{
+	if (loadConfigFile("config.ini", &configFile))
+	{
+		printf("ERROR loading configuration file!\n");
+		return SC_ERROR;
+	}
+
+	return SC_NO_ERROR;
+}
+
+static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo)
 {
 	FILE* inputFile;
 	char singleLine[LINE_LENGTH];
-	char lineDelimiter[2] = "-";
 	char* singleWord;
 
-	if ((inputFile = fopen(filename, "r") == NULL)
+	if ((inputFile = fopen(filename, "r")) == NULL)
 	{
 		printf("Error opening init file!\n");
 		return SC_ERROR;
@@ -403,21 +415,77 @@ StreamControllerError loadConfigFile(char* filename)
 
 	while (fgets(singleLine, LINE_LENGTH, inputFile) != NULL)
 	{
-		singleWord = strtok(singleLine, lineDelimiter);
+		singleWord = strtok(singleLine, "-");
 
-		if (singleWord == "frequency")
+		removeWhiteSpaces(singleWord);
+
+		if (strcmp(singleWord, "frequency") == 0)
 		{
-			
+			printf("Evo frekvencije: \n");
+			singleWord = strtok(NULL, "-");
+			removeWhiteSpaces(singleWord);
+			configInfo->tuneFrequency = atoi(singleWord);
+		}
+		else if (strcmp(singleWord, "bandwidth") == 0)
+		{
+			printf("Evo bandwidtha: \n");
+			singleWord = strtok(NULL, "-");
+			removeWhiteSpaces(singleWord);
+			configInfo->tuneBandwidth = atoi(singleWord);
+		}
+		else if (strcmp(singleWord, "module") == 0)
+		{
+			printf("Evo modula: \n");
+			singleWord = strtok(NULL, "-");
+			removeWhiteSpaces(singleWord);
+
+			if (strcmp(singleWord, "DVB_T"))
+			{
+				configInfo->tuneModule = 0;
+			}
+			else
+			{
+				printf("DTV standard not supported!\n");
+				return SC_ERROR;
+			}
+		}
+		else if (strcmp(singleWord, "program_number") == 0)
+		{
+			printf("Evo ga program number: \n");
+			singleWord = strtok(NULL, "-");
+			removeWhiteSpaces(singleWord);
+			configInfo->programNumber = atoi(singleWord);
 		}
 	}
 
-
-
-
-
-
-
-
+	fclose(inputFile);
 
 	return SC_NO_ERROR;
+}
+
+static void removeWhiteSpaces(char* word)
+{
+	int stringLen = strlen(word);
+	int i = 0;
+	int j = 0;
+	int k = stringLen - 1;
+	char* startString = word;
+	char* returnString;
+
+	while (startString[i] == 32)
+	{
+		i++;
+	}
+
+	while ((startString[k] == 32) & (startString[k] != '\0'))
+	{
+		k--;
+	}
+
+	for (j = 0; j < (k - i); j++)
+	{
+		word[j] = startString[j+i];
+	}
+
+	word[k-i+1] = '\0';
 }
