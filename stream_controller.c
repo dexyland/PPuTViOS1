@@ -421,21 +421,18 @@ static StreamControllerError loadConfigFile(char* filename, InitialInfo* configI
 
 		if (strcmp(singleWord, "frequency") == 0)
 		{
-			printf("Evo frekvencije: \n");
 			singleWord = strtok(NULL, "-");
 			removeWhiteSpaces(singleWord);
 			configInfo->tuneFrequency = atoi(singleWord);
 		}
 		else if (strcmp(singleWord, "bandwidth") == 0)
 		{
-			printf("Evo bandwidtha: \n");
 			singleWord = strtok(NULL, "-");
 			removeWhiteSpaces(singleWord);
 			configInfo->tuneBandwidth = atoi(singleWord);
 		}
 		else if (strcmp(singleWord, "module") == 0)
 		{
-			printf("Evo modula: \n");
 			singleWord = strtok(NULL, "-");
 			removeWhiteSpaces(singleWord);
 
@@ -451,7 +448,6 @@ static StreamControllerError loadConfigFile(char* filename, InitialInfo* configI
 		}
 		else if (strcmp(singleWord, "program_number") == 0)
 		{
-			printf("Evo ga program number: \n");
 			singleWord = strtok(NULL, "-");
 			removeWhiteSpaces(singleWord);
 			configInfo->programNumber = atoi(singleWord);
