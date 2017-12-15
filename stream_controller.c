@@ -438,7 +438,7 @@ static StreamControllerError loadConfigFile(char* filename, InitialInfo* configI
 
 			if (strcmp(singleWord, "DVB_T"))
 			{
-				configInfo->tuneModule = 0;
+				configInfo->tuneModule = DVB_T;
 			}
 			else
 			{
