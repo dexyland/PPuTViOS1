@@ -1,5 +1,6 @@
 #include "remote_controller.h"
 #include "stream_controller.h"
+#include <signal.h>
 
 static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
 {
@@ -33,7 +34,12 @@ static int32_t keyOne = 0;
 static int32_t keyTwo = 0;
 static int32_t keyThree = 0;
 
-struct sigevent {
+static timer_t keyTimer;
+static struct itimerspec timerSpec;
+static struct itimerspec timerSpecOld;
+static int32_t timerFlags = 0;
+
+/*struct sigevent {
 	int sigev_notify;
 	int sigev_signo;
 	union sigval sigev_value;
@@ -46,9 +52,22 @@ union sigval {
 	int sival_int;
 	void *sival_ptf;
 };
-
+*/
 int main()
 {
+	/*struct sigevent signalEvent;
+	signalEvent.sigev_notify = SIGEV_THREAD;
+	signalEvent.sigev_notify_function = changeChannel;
+	signalEvent.sigev_value.sival_ptr = NULL;
+	signalEvent.sigev_notify_attributes = NULL;
+	timer_create(CLOCK_REALTIME, &signalEvent, &keyTimer);
+
+	printf("Napravio timer!\n");
+
+	memset(&timerSpec, 0, sizeof(timerSpec));
+	timerSpec.it_value.tv_sec = 3;
+	timerSpec.it_value.tv_nsec = 0;
+*/
 	/* load initial info from config.ini file */
 	if (loadInitialInfo())
 	{
@@ -73,7 +92,7 @@ int main()
 	}
 	pthread_mutex_unlock(&deinitMutex);
 
-
+	//timer_delete(keyTimer);
     
     /* unregister remote controller callback */
     ERRORCHECK(unregisterRemoteControllerCallback(remoteControllerCallback));
@@ -163,6 +182,8 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 
 void inputChannelNumber(uint16_t key)
 {
+	//timer_settime(keyTimer, timerFlags, &timerSpec, &timerSpecOld);
+
 	if (keysPressed == 0)
 	{
 		keyOne = key;
