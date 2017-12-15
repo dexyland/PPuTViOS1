@@ -92,6 +92,6 @@ StreamControllerError loadInitialInfo();
 /**
  * @brief 
  */
-void changeChannelKey(int32_t channelNumber);
+void changeChannelKey(int32_t channel);
 
 #endif /* __STREAM_CONTROLLER_H__ */
