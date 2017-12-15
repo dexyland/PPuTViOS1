@@ -22,8 +22,7 @@ if (x != 0)                                                                 \
  }                                                                          \
 }
 void inputChannelNumber(uint16_t key);
-void changeChannel(uint16_t channel);
-int32_t parseChannelNumber(uint16_t channelNum);
+void changeChannel();
 
 static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value);
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
@@ -164,53 +163,35 @@ void inputChannelNumber(uint16_t key)
 	{
 		keyThree = key;
 		keysPressed++;
+		changeChannel();
 	}
 
 	printf("\nKeyOne: %d\n", keyOne);
 	printf("KeyTwo: %d\n", keyTwo);
 	printf("KeyThree: %d\n", keyThree);
 	printf("Keypressed: %d\n", keysPressed);
-
-	if (keysPressed == 3)
-	{
-		int channel = 100*keyOne + 10*keyTwo + keyThree;
-		changeChannel(parseChannelNumber(channel));
-		keysPressed = 0;
-	}
 }
 
-void changeChannel(uint16_t channel)
+void changeChannel()
 {
-	if (channel >= 0 && channel <= 3)
+	int32_t channel;
+
+	if (keysPressed == 1)
 	{
-		changeChannelKey(channel);
+		channel = keyOne;
 	}
-}
-
-int32_t parseChannelNumber(uint16_t channelNum)
-{
-	int32_t retVal;
-
-	if (channelNum == 0)
+	else if (keysPressed == 2)
 	{
-		retVal = 0;
+		channel = 10*keyOne + keyTwo;
+	}
+	else if (keysPressed == 3)
+	{
+		channel = 100*keyOne + 10*keyTwo + keyThree;
 	}
 
-	return retVal;
+	changeChannelKey(channel);
+
+	keysPressed = 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
