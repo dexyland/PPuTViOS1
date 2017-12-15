@@ -163,6 +163,7 @@ void inputChannelNumber(uint16_t key)
 	{
 		keyThree = key;
 		keysPressed++;
+		changeChannel();
 	}
 
 	printf("\nKeyOne: %d\n", keyOne);

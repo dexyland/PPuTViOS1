@@ -33,6 +33,20 @@ static int32_t keyOne = 0;
 static int32_t keyTwo = 0;
 static int32_t keyThree = 0;
 
+struct sigevent {
+	int sigev_notify;
+	int sigev_signo;
+	union sigval sigev_value;
+	void (*sigev_notify_function) (union sigval);
+	void *sigev_notify_attributes;
+	pid_t sigev_notify_thread_id;
+};
+
+union sigval {
+	int sival_int;
+	void *sival_ptf;
+};
+
 int main()
 {
 	/* load initial info from config.ini file */
