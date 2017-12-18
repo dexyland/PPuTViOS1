@@ -26,9 +26,9 @@ static pthread_cond_t demuxCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t demuxMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void* streamControllerTask();
+static void removeWhiteSpaces(char* string);
 static void startChannel(int32_t channelNumber);
 static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo);
-static void removeWhiteSpaces(char* string);
 
 static InitialInfo configFile;
 
