@@ -29,7 +29,9 @@ static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t valu
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
+
 static int32_t keysPressed = 0;
+static int32_t keys[3];
 static int32_t keyOne = 0;
 static int32_t keyTwo = 0;
 static int32_t keyThree = 0;
@@ -37,25 +39,12 @@ static int32_t keyThree = 0;
 static timer_t keyTimer;
 static struct itimerspec timerSpec;
 static struct itimerspec timerSpecOld;
+static struct sigevent signalEvent;
 static int32_t timerFlags = 0;
 
-/*struct sigevent {
-	int sigev_notify;
-	int sigev_signo;
-	union sigval sigev_value;
-	void (*sigev_notify_function) (union sigval);
-	void *sigev_notify_attributes;
-	pid_t sigev_notify_thread_id;
-};
 
-union sigval {
-	int sival_int;
-	void *sival_ptf;
-};
-*/
 int main()
 {
-	/*struct sigevent signalEvent;
 	signalEvent.sigev_notify = SIGEV_THREAD;
 	signalEvent.sigev_notify_function = changeChannel;
 	signalEvent.sigev_value.sival_ptr = NULL;
@@ -65,9 +54,9 @@ int main()
 	printf("Napravio timer!\n");
 
 	memset(&timerSpec, 0, sizeof(timerSpec));
-	timerSpec.it_value.tv_sec = 3;
+	timerSpec.it_value.tv_sec = 2;
 	timerSpec.it_value.tv_nsec = 0;
-*/
+
 	/* load initial info from config.ini file */
 	if (loadInitialInfo())
 	{
@@ -182,28 +171,38 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 
 void inputChannelNumber(uint16_t key)
 {
-	//timer_settime(keyTimer, timerFlags, &timerSpec, &timerSpecOld);
+	timer_settime(keyTimer, timerFlags, &timerSpec, &timerSpecOld);
 
 	if (keysPressed == 0)
 	{
-		keyOne = key;
+		//keyOne = key;
+		keys[0] = key;
 		keysPressed++;
 	}
 	else if (keysPressed == 1)
 	{
-		keyTwo = key;
+		//keyTwo = key;
+		keys[1] = key;
 		keysPressed++;
 	}
 	else if (keysPressed == 2)
 	{
-		keyThree = key;
+		//keyThree = key;
+		keys[2] = key;
 		keysPressed++;
-		changeChannel();
+	}
+	else if (keysPressed == 3)
+	{
+		keysPressed == 1;
+		//keyOne = key;
+		keys[0] = key;
+		keys[1] = 0;
+		keys[2] = 0;
 	}
 
-	printf("\nKeyOne: %d\n", keyOne);
-	printf("KeyTwo: %d\n", keyTwo);
-	printf("KeyThree: %d\n", keyThree);
+	printf("\nKeyOne: %d\n", keys[0]);
+	printf("KeyTwo: %d\n", keys[1]);
+	printf("KeyThree: %d\n", keys[2]);
 	printf("Keypressed: %d\n", keysPressed);
 }
 
@@ -213,20 +212,26 @@ void changeChannel()
 
 	if (keysPressed == 1)
 	{
-		channel = keyOne;
+		//channel = keyOne;
+		channel = keys[0];
 	}
 	else if (keysPressed == 2)
 	{
-		channel = 10*keyOne + keyTwo;
+		//channel = 10*keyOne + keyTwo;
+		channel = 10*keys[0] + keys[1];
 	}
 	else if (keysPressed == 3)
 	{
-		channel = 100*keyOne + 10*keyTwo + keyThree;
+		//channel = 100*keyOne + 10*keyTwo + keyThree;
+		channel = 100*keys[0] + 10*keys[1] + keys[2];
 	}
 
 	changeChannelKey(channel);
 
 	keysPressed = 0;
+	keys[0] = 0;
+	keys[1] = 0;
+	keys[2] = 0;
 }
 
 
