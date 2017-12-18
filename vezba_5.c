@@ -1,5 +1,6 @@
 #include "remote_controller.h"
 #include "stream_controller.h"
+#include "graphics_controller.h"
 #include <signal.h>
 
 static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
@@ -51,8 +52,6 @@ int main()
 	signalEvent.sigev_notify_attributes = NULL;
 	timer_create(CLOCK_REALTIME, &signalEvent, &keyTimer);
 
-	printf("Napravio timer!\n");
-
 	memset(&timerSpec, 0, sizeof(timerSpec));
 	timerSpec.it_value.tv_sec = 2;
 	timerSpec.it_value.tv_nsec = 0;
@@ -69,7 +68,10 @@ int main()
     
     /* register remote controller callback */
     ERRORCHECK(registerRemoteControllerCallback(remoteControllerCallback));
-    
+
+	/* initialize graphics controller module */
+	ERRORCHECK(graphicsControllerInit());
+
     /* initialize stream controller module */
     ERRORCHECK(streamControllerInit());
 
@@ -81,7 +83,12 @@ int main()
 	}
 	pthread_mutex_unlock(&deinitMutex);
 
-	//timer_delete(keyTimer);
+	timer_delete(keyTimer);
+
+	/* deinitialize graphics controller module */
+	ERRORCHECK(graphicsControllerDeinit());
+
+	printf("Grafika deinit\n");
     
     /* unregister remote controller callback */
     ERRORCHECK(unregisterRemoteControllerCallback(remoteControllerCallback));
@@ -109,6 +116,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
                 printf("Video pid: %d\n", channelInfo.videoPid);
                 printf("**********************************************************\n");
             }
+			drawInfoRect();
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");

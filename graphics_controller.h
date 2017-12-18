@@ -1,6 +1,9 @@
 #ifndef __GRAPHICS_CONTROLLER_H__
 #define __GRAPHICS_CONTROLLER_H__
 
+#include <stdint.h>
+#include <stdbool.h>
+
 /**
  * @brief Structure that defines stream controller error
  */
@@ -16,10 +19,10 @@ typedef enum _GraphicsControllerError
  */
 typedef struct _DrawComponents
 {
-	bool showProgramNumer;
+	bool showProgramNumber;
 	bool showVolume;
 	bool showInfo;
-	int32_t programNumer;
+	int32_t programNumber;
 	int32_t volume;
 }DrawComponents;
 
@@ -31,12 +34,32 @@ typedef struct _DrawComponents
  */
 GraphicsControllerError graphicsControllerInit();
 
-
 /**
  * @brief Deinitializes graphics controller module
  *
  * @return graphics controller error code
  */
 GraphicsControllerError graphicsControllerDeinit();
+
+/**
+ * @brief Deinitializes graphics controller module
+ *
+ * @return graphics controller error code
+ */
+void drawProgramNumber();
+
+/**
+ * @brief Deinitializes graphics controller module
+ *
+ * @return graphics controller error code
+ */
+void drawVolumeBar();
+
+/**
+ * @brief Deinitializes graphics controller module
+ *
+ * @return graphics controller error code
+ */
+void drawInfoRect();
 
 #endif /* __GRAPHICS_CONTROLLER_H__ */
