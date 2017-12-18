@@ -89,6 +89,31 @@ typedef struct _PmtTable
 }PmtTable;
 
 /**
+ * @brief Structure that defines TDT table
+ */
+typedef struct _TdtTable
+{
+	uint8_t tableId;
+	uint8_t sectionSyntaxIndicator;
+	uint16_t sectionLength;
+	uint64_t UTCtime;
+	uint32_t time;
+	uint16_t MJD;
+}TdtTable;
+
+/**
+ * @brief Structure that defines TOT table
+ */
+ typedef struct _TotTable
+ {
+	uint8_t tableId;
+	uint8_t sectionSyntaxIndicator;
+	uint16_t sectionLength;
+	uint64_t UTCtime;
+	uint16_t descriptorsLoopLength;
+ }TotTable;
+	
+/**
  * @brief  Parse PAT header.
  * 
  * @param  [in]   patHeaderBuffer Buffer that contains PAT header
