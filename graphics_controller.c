@@ -11,6 +11,7 @@ static DFBSurfaceDescription surfaceDesc;
 static int32_t screenWidth = 0;
 static int32_t screenHeight = 0;
 static uint8_t stopDrawing = 0;
+static bool graphicsChanged = false;
 
 static pthread_t gcThread;
 static DrawComponents componentsToDraw;
@@ -136,10 +137,12 @@ void renderThread()
 {
 	wipeScreen();
 
+
 	while (!stopDrawing)
 	{
 		if (componentsToDraw.showProgramNumber)
 		{
+			
 		}
 
 		if (componentsToDraw.showVolume)
@@ -148,18 +151,18 @@ void renderThread()
 
 		if (componentsToDraw.showInfo)
 		{
-			primary->SetColor(primary, 0x40, 0x10, 0x80, 0x0F);
-    		primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 9*screenWidth/10, 			19*screenHeight/20);
+			primary->SetColor(primary, 0xFF, 0x00, 0x00, 0xFF);
+    		primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 8*screenWidth/10, 18*screenHeight/20);
 		}
 
-		DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
+		DFBCHECK(primary->Flip(primary, NULL, 0));
 	}
 }
 
 GraphicsControllerError wipeScreen()
 {
 	/* clear the screen (draw black full screen rectangle) */
-    if (primary->SetColor(primary, 0x00, 0x00 ,0x00, 0xff))
+    if (primary->SetColor(primary, 0x00, 0x00 ,0x00, 0x00))
 	{
 		return GC_ERROR;
 	}
@@ -188,7 +191,7 @@ void drawVolumeBar()
 
 void drawInfoRect()
 {
-
+	graphicsChanged = true;
 	timer_settime(infoTimer, timerFlags, &infoTimerSpec, &infoTimerSpecOld);
 	componentsToDraw.showInfo = true;
 }
@@ -244,6 +247,7 @@ void removeVolumeBar()
 
 void removeInfo()
 {
+	printf("REMOVE INFO TIMER CALLBACK CALLED!\n");
 	componentsToDraw.showInfo = false;
 }
 
