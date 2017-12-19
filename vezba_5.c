@@ -33,9 +33,6 @@ static ChannelInfo channelInfo;
 
 static int32_t keysPressed = 0;
 static int32_t keys[3];
-static int32_t keyOne = 0;
-static int32_t keyTwo = 0;
-static int32_t keyThree = 0;
 
 static timer_t keyTimer;
 static struct itimerspec timerSpec;
@@ -70,7 +67,7 @@ int main()
     ERRORCHECK(registerRemoteControllerCallback(remoteControllerCallback));
 
 	/* initialize graphics controller module */
-	ERRORCHECK(graphicsControllerInit());
+	//ERRORCHECK(graphicsControllerInit());
 
     /* initialize stream controller module */
     ERRORCHECK(streamControllerInit());
@@ -86,9 +83,9 @@ int main()
 	timer_delete(keyTimer);
 
 	/* deinitialize graphics controller module */
-	ERRORCHECK(graphicsControllerDeinit());
+	//ERRORCHECK(graphicsControllerDeinit());
 
-	printf("Grafika deinit\n");
+	//printf("Grafika deinit\n");
     
     /* unregister remote controller callback */
     ERRORCHECK(unregisterRemoteControllerCallback(remoteControllerCallback));
@@ -116,7 +113,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
                 printf("Video pid: %d\n", channelInfo.videoPid);
                 printf("**********************************************************\n");
             }
-			drawInfoRect();
+			//drawInfoRect();
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
@@ -183,26 +180,22 @@ void inputChannelNumber(uint16_t key)
 
 	if (keysPressed == 0)
 	{
-		//keyOne = key;
 		keys[0] = key;
 		keysPressed++;
 	}
 	else if (keysPressed == 1)
 	{
-		//keyTwo = key;
 		keys[1] = key;
 		keysPressed++;
 	}
 	else if (keysPressed == 2)
 	{
-		//keyThree = key;
 		keys[2] = key;
 		keysPressed++;
 	}
 	else if (keysPressed == 3)
 	{
 		keysPressed == 1;
-		//keyOne = key;
 		keys[0] = key;
 		keys[1] = 0;
 		keys[2] = 0;
@@ -220,17 +213,14 @@ void changeChannel()
 
 	if (keysPressed == 1)
 	{
-		//channel = keyOne;
 		channel = keys[0];
 	}
 	else if (keysPressed == 2)
 	{
-		//channel = 10*keyOne + keyTwo;
 		channel = 10*keys[0] + keys[1];
 	}
 	else if (keysPressed == 3)
 	{
-		//channel = 100*keyOne + 10*keyTwo + keyThree;
 		channel = 100*keys[0] + 10*keys[1] + keys[2];
 	}
 

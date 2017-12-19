@@ -298,3 +298,52 @@ ParseErrorCode printPmtTable(PmtTable* pmtTable)
     
     return TABLES_PARSE_OK;
 }
+
+ParseErrorCode parseTdtTable(const uint8_t* tdtSectionBuffer, TdtTable* tdtTable)
+{
+	uint8_t lower8Bits = 0;
+	uint8_t higher8Bits = 0;
+    uint16_t all16Bits = 0;
+
+    if (tdtSectionBuffer == NULL || tdtTable == NULL)
+    {
+        printf("\n%s : ERROR received parameters are not ok\n", __FUNCTION__);
+        return TABLES_PARSE_ERROR;
+    }
+
+	tdtTable->tableId = (uint8_t)* tdtSectionBuffer;
+
+	higher8Bits = (uint8_t) *(tdtSectionBuffer + 1);
+	lower8Bits = (uint8_t) *(tdtSectionBuffer + 2);
+	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+	tdtTable->sectionLength = all16Bits & 0x0FFF;
+
+	higher8Bits = (uint8_t) *(tdtSectionBuffer + 3);
+	lower8Bits = (uint8_t) *(tdtSectionBuffer + 4);
+	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+	tdtTable->MJD = all16Bits;
+
+	tdtTable->hours = (uint8_t) *(tdtSectionBuffer + 5);
+	tdtTable->minutes = (uint8_t) *(tdtSectionBuffer + 6);
+	tdtTable->seconds = (uint8_t) *(tdtSectionBuffer + 7);
+
+	return TABLES_PARSE_OK;
+}
+
+ParseErrorCode printTdtTable(TdtTable* tdtTable)
+{
+	if (tdtTable == NULL)
+	{
+		printf("\n%s : ERROR received parameter is not ok\n", __FUNCTION__);
+		return TABLES_PARSE_ERROR;
+	}
+
+    printf("\n********************TDT TABLE SECTION********************\n");
+    printf("table_id                 |      %d\n",tdtTable->tableId);
+    printf("section_length           |      %d\n",tdtTable->sectionLength);
+	printf("current time (UTC time)  |      %.2x:%.2x:%.2x\n", tdtTable->hours, tdtTable->minutes, tdtTable->seconds);
+	printf("MJD code                 |      %d\n", tdtTable->MJD);
+    printf("\n********************TDT TABLE SECTION********************\n");
+
+	return TABLES_PARSE_OK;
+}

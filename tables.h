@@ -96,9 +96,10 @@ typedef struct _TdtTable
 	uint8_t tableId;
 	uint8_t sectionSyntaxIndicator;
 	uint16_t sectionLength;
-	uint64_t UTCtime;
-	uint32_t time;
 	uint16_t MJD;
+	uint8_t hours;
+	uint8_t minutes;
+	uint8_t seconds;
 }TdtTable;
 
 /**
@@ -176,6 +177,15 @@ ParseErrorCode parsePmtElementaryInfo(const uint8_t* pmtElementaryInfoBuffer, Pm
 ParseErrorCode parsePmtTable(const uint8_t* pmtSectionBuffer, PmtTable* pmtTable);
 
 /**
+ * @brief Parse TDT table
+ *
+ * @param [in]  tdtSectionBuffer Buffer that contains tdt table section
+ * @param [out] tdtTable TDT table
+ * @return tables error code
+ */
+ParseErrorCode parseTdtTable(const uint8_t* tdtSectionBuffer, TdtTable* tdtTable);
+
+/**
  * @brief Print PMT table
  *
  * @param [in] pmtTable PMT table
@@ -183,6 +193,12 @@ ParseErrorCode parsePmtTable(const uint8_t* pmtSectionBuffer, PmtTable* pmtTable
  */
 ParseErrorCode printPmtTable(PmtTable* pmtTable);
 
+/**
+ * @brief Print TDT table
+ *
+ * @param [in] tdtTable TDT table
+ * @return tables error code
+ */
+ParseErrorCode printTdtTable(TdtTable* tdtTable);
+
 #endif /* __TABLES_H__ */
-
-

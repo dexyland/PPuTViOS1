@@ -123,6 +123,8 @@ GraphicsControllerError graphicsControllerDeinit()
         return GC_THREAD_ERROR;
     }
 
+	printf("GCTHREAD joined!\n");
+
 	timer_delete(programNumberTimer);
 	timer_delete(volumeTimer);
 	timer_delete(infoTimer);
