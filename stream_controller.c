@@ -3,6 +3,7 @@
 static PatTable *patTable;
 static PmtTable *pmtTable;
 static TdtTable *tdtTable;
+static TotTable *totTable;
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -81,6 +82,7 @@ StreamControllerError streamControllerDeinit()
     free(patTable);
     free(pmtTable);
 	free(tdtTable);
+	free(totTable);
 
     /* set isInitialized flag */
     isInitialized = false;
@@ -219,11 +221,30 @@ void startChannel(int32_t channelNumber)
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
 
-	/* free PAT table filter */
+	/* free PMT table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
 
 	/* set demux filter for receive TDT table of program */
     if(Demux_Set_Filter(playerHandle, 0x0014, 0x70, &filterHandle))
+	{
+		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
+        return;
+	}
+
+	/* wait for a TDT table to be parsed*/
+    pthread_mutex_lock(&demuxMutex);
+	if (ETIMEDOUT == pthread_cond_wait(&demuxCond, &demuxMutex))
+	{
+		printf("\n%s : ERROR Lock timeout exceeded!\n", __FUNCTION__);
+        streamControllerDeinit();
+	}
+	pthread_mutex_unlock(&demuxMutex);
+
+	/* free TDT table filter */
+    Demux_Free_Filter(playerHandle, filterHandle);
+
+	/* set demux filter for receive TOT table of program */
+    if(Demux_Set_Filter(playerHandle, 0x0014, 0x73, &filterHandle))
 	{
 		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
         return;
@@ -261,6 +282,16 @@ void* streamControllerTask()
         return (void*) SC_ERROR;
 	}  
     memset(tdtTable, 0x0, sizeof(TdtTable));
+
+    /* allocate memory for TOT table section */
+    totTable=(TotTable*)malloc(sizeof(TotTable));
+    if(totTable==NULL)
+    {
+		printf("\n%s : ERROR Cannot allocate memory\n", __FUNCTION__);
+        return (void*) SC_ERROR;
+	}  
+    memset(totTable, 0x0, sizeof(TotTable));
+
        
     /* initialize tuner device */
     if(Tuner_Init())
@@ -269,6 +300,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(tdtTable);
+		free(totTable);
         return (void*) SC_ERROR;
     }
     
@@ -289,6 +321,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(tdtTable);
+		free(totTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -301,6 +334,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(tdtTable);
+		free(totTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -313,6 +347,7 @@ void* streamControllerTask()
 		free(patTable);
         free(pmtTable);
 		free(tdtTable);
+		free(totTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
 	}
@@ -324,6 +359,7 @@ void* streamControllerTask()
 		free(patTable);
         free(pmtTable);
 		free(tdtTable);
+		free(totTable);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;	
@@ -348,6 +384,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(tdtTable);
+		free(totTable);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;
@@ -400,13 +437,26 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
     }
 	else if (tableId == 0x70)
 	{
-		printf("\n%s -----TDT TABLE ARRIVED-----\n",__FUNCTION__);
+		//printf("\n%s -----TDT TABLE ARRIVED-----\n",__FUNCTION__);
 
 		if (parseTdtTable(buffer, tdtTable) == TABLES_PARSE_OK)
 		{
-			printTdtTable(tdtTable);
+			//printTdtTable(tdtTable);
+			pthread_mutex_lock(&demuxMutex);
+		    pthread_cond_signal(&demuxCond);
+		    pthread_mutex_unlock(&demuxMutex);
 		}
 	}
+	else if (tableId == 0x73)
+	{
+		printf("\n%s -----TOT TABLE ARRIVED-----\n",__FUNCTION__);
+
+		if (parseTotTable(buffer, totTable) == TABLES_PARSE_OK)
+		{
+			printTotTable(totTable);
+		}
+	}
+
     return 0;
 }
 

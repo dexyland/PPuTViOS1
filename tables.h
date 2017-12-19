@@ -6,7 +6,9 @@
 #include <string.h>
 
 #define TABLES_MAX_NUMBER_OF_PIDS_IN_PAT    20 	    /* Max number of PMT pids in one PAT table */
-#define TABLES_MAX_NUMBER_OF_ELEMENTARY_PID 20       /* Max number of elementary pids in one PMT table */
+#define TABLES_MAX_NUMBER_OF_ELEMENTARY_PID 20      /* Max number of elementary pids in one PMT table */
+#define TABLES_MAX_NUMBER_OF_LTO_DESCRIPTORS 20     /* Max number of elementary info in local time offset descriptor */
+#define TABLES_MAX_NUMBER_OF_TOT_DESCRIPTORS 20     /* Max number of descriptors in tot table */
 
 /**
  * @brief Enumeration of possible tables parser error codes
@@ -103,6 +105,33 @@ typedef struct _TdtTable
 }TdtTable;
 
 /**
+ * @brief Structure that defines single local time offset description
+ */ 
+typedef struct _LTODescriptorInfo
+{
+	uint8_t countryCH1;
+	uint8_t countryCH2;
+	uint8_t countryCH3;
+	uint8_t countryRegionId;
+	uint8_t localTimeOffsetPolarity;
+	uint16_t localTimeOffset;
+	uint16_t timeOfChangeMJD;
+	uint32_t timeOfChangeUTC;
+	uint16_t nextTimeOffset;
+}LTODescriptorInfo;
+
+/**
+ * @brief Structure that defines local time offset descriptor
+ */
+typedef struct _LocalTimeOffsetDescriptor
+{
+	uint8_t descriptorTag;
+	uint8_t descriptorLength;
+	LTODescriptorInfo ltoInfo[TABLES_MAX_NUMBER_OF_LTO_DESCRIPTORS];
+	uint8_t numberOfDescriptors;
+}LocalTimeOffsetDescriptor;
+
+/**
  * @brief Structure that defines TOT table
  */
  typedef struct _TotTable
@@ -110,8 +139,13 @@ typedef struct _TdtTable
 	uint8_t tableId;
 	uint8_t sectionSyntaxIndicator;
 	uint16_t sectionLength;
-	uint64_t UTCtime;
+	uint16_t MJD;
+	uint8_t hours;
+	uint8_t minutes;
+	uint8_t seconds;
 	uint16_t descriptorsLoopLength;
+	LocalTimeOffsetDescriptor descriptors[TABLES_MAX_NUMBER_OF_TOT_DESCRIPTORS];
+	uint8_t descriptorsCount;
  }TotTable;
 	
 /**
@@ -177,6 +211,14 @@ ParseErrorCode parsePmtElementaryInfo(const uint8_t* pmtElementaryInfoBuffer, Pm
 ParseErrorCode parsePmtTable(const uint8_t* pmtSectionBuffer, PmtTable* pmtTable);
 
 /**
+ * @brief Print PMT table
+ *
+ * @param [in] pmtTable PMT table
+ * @return tables error code
+ */
+ParseErrorCode printPmtTable(PmtTable* pmtTable);
+
+/**
  * @brief Parse TDT table
  *
  * @param [in]  tdtSectionBuffer Buffer that contains tdt table section
@@ -186,19 +228,28 @@ ParseErrorCode parsePmtTable(const uint8_t* pmtSectionBuffer, PmtTable* pmtTable
 ParseErrorCode parseTdtTable(const uint8_t* tdtSectionBuffer, TdtTable* tdtTable);
 
 /**
- * @brief Print PMT table
- *
- * @param [in] pmtTable PMT table
- * @return tables error code
- */
-ParseErrorCode printPmtTable(PmtTable* pmtTable);
-
-/**
  * @brief Print TDT table
  *
  * @param [in] tdtTable TDT table
  * @return tables error code
  */
 ParseErrorCode printTdtTable(TdtTable* tdtTable);
+
+/**
+ * @brief Parse TOT table
+ *
+ * @param [in]  totSectionBuffer Buffer that contains tot table section
+ * @param [out] totTable TOT table
+ * @return tables error code
+ */
+ParseErrorCode parseTotTable(const uint8_t* totSectionBuffer, TotTable* totTable);
+
+/**
+ * @brief Print TOT table
+ *
+ * @param [in] totTable TOT table
+ * @return tables error code
+ */
+ParseErrorCode printTotTable(TotTable* totTable);
 
 #endif /* __TABLES_H__ */
