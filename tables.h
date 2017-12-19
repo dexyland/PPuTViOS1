@@ -115,9 +115,6 @@ typedef struct _LTODescriptorInfo
 	uint8_t countryRegionId;
 	uint8_t localTimeOffsetPolarity;
 	uint16_t localTimeOffset;
-	uint16_t timeOfChangeMJD;
-	uint32_t timeOfChangeUTC;
-	uint16_t nextTimeOffset;
 }LTODescriptorInfo;
 
 /**
@@ -128,7 +125,7 @@ typedef struct _LocalTimeOffsetDescriptor
 	uint8_t descriptorTag;
 	uint8_t descriptorLength;
 	LTODescriptorInfo ltoInfo[TABLES_MAX_NUMBER_OF_LTO_DESCRIPTORS];
-	uint8_t numberOfDescriptors;
+	uint8_t numberOfInfos;
 }LocalTimeOffsetDescriptor;
 
 /**

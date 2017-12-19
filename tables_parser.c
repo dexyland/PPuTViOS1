@@ -353,6 +353,8 @@ ParseErrorCode parseTotTable(const uint8_t* totSectionBuffer, TotTable* totTable
 	uint8_t lower8Bits = 0;
 	uint8_t higher8Bits = 0;
     uint16_t all16Bits = 0;
+	uint16_t descriptorLoopLength = 0;
+	uint8_t infoLoopLength = 0;
 
     if (totSectionBuffer == NULL || totTable == NULL)
     {
@@ -380,6 +382,34 @@ ParseErrorCode parseTotTable(const uint8_t* totSectionBuffer, TotTable* totTable
 	lower8Bits = (uint8_t) *(totSectionBuffer + 9);
 	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
 	totTable->descriptorsLoopLength = all16Bits & 0x0FFF;
+	descriptorLoopCount = all16Bits & 0x0FFF;
+
+	while (descriptorLoopCount > 4)
+	{
+		uint8_t i = 0;
+		uint8_t currentDesc = totTable->descriptorsCount;
+
+		totTable->descriptors[currentDesc].descriptorTag = (uint8_t) *(totSectionBuffer + 10 + 15*currentDesc);
+		totTable->descriptors[currentDesc].descriptorLength = (uint8_t) *(totSectionBuffer + 11 + 15*currentDesc);
+		totTable->descriptors[currentDesc].numberOfInfos = totTable->descriptors[currentDesc].descriptorLength / 13;
+
+		for (i = 0; i < totTable->descriptors[currentDesc].numberOfinfos; i++)
+		{
+			totTable->descriptors[currentDesc].ltoInfo[i].countryCH1 = (uint8_t) *(totSectionBuffer +);
+			totTable->descriptors[currentDesc].ltoInfo[i].countryCH2 = (uint8_t) *(totSectionBuffer +);
+			totTable->descriptors[currentDesc].ltoInfo[i].countryCH3 = (uint8_t) *(totSectionBuffer +);
+			totTable->descriptors[currentDesc].ltoInfo[i].countryRegionId = (uint8_t) *(totSectionBuffer +);
+			totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffsetPolarity = (uint8_t) *(totSectionBuffer +);
+			
+			higher8Bits = (uint8_t) *(totSectionBuffer +);
+			lower8Bis = (uint8_t) *(totSectionBuffer +);
+			all16Bits = (higher8Bits << 8) + lower8Bits;
+			totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffset = all16Bits;    
+		}
+
+		descriptorLoopCount -= (totTable->descriptors[currentDesc].descriptorLength + 2);
+		totTable->descriptorsCount++;
+	}
 
 	return TABLES_PARSE_OK;	
 }
