@@ -47,6 +47,30 @@ typedef struct _InitialInfo
 }InitialInfo;
 
 /**
+ * @brief Structure that holds time when TOT table was received
+ */
+typedef struct _TimeStructure
+{
+	uint8_t hours;
+	uint8_t minutes;
+	uint8_t seconds;
+	time_t timeStampSeconds;
+}TimeStructure;
+
+/**
+ * @brief Time callback
+ */
+typedef void(*TimeCallback)(TimeStructure* timeStructure);
+
+/*
+ * @brief Registers time callback
+ *
+ * @param  [in] time callback - pointer to time callback function
+ * @return Stream controller error code
+ */
+StreamControllerError registerTimeCallback(TimeCallback timeCallback);
+
+/**
  * @brief Initializes stream controller module
  *
  * @return stream controller error code

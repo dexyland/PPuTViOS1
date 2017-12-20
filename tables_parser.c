@@ -323,9 +323,14 @@ ParseErrorCode parseTdtTable(const uint8_t* tdtSectionBuffer, TdtTable* tdtTable
 	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
 	tdtTable->MJD = all16Bits;
 
-	tdtTable->hours = (uint8_t) *(tdtSectionBuffer + 5);
-	tdtTable->minutes = (uint8_t) *(tdtSectionBuffer + 6);
-	tdtTable->seconds = (uint8_t) *(tdtSectionBuffer + 7);
+	lower8Bits = (uint8_t) *(tdtSectionBuffer + 5);
+	tdtTable->hours = 16*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+
+	lower8Bits = (uint8_t) *(tdtSectionBuffer + 6);
+	tdtTable->minutes = 16*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+
+	lower8Bits = (uint8_t) *(tdtSectionBuffer + 7);
+	tdtTable->seconds = 16*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
 	return TABLES_PARSE_OK;
 }
@@ -341,7 +346,7 @@ ParseErrorCode printTdtTable(TdtTable* tdtTable)
     printf("\n********************TDT TABLE SECTION********************\n");
     printf("table_id                 |      %d\n",tdtTable->tableId);
     printf("section_length           |      %d\n",tdtTable->sectionLength);
-	printf("current time (UTC time)  |      %.2x:%.2x:%.2x\n", tdtTable->hours, tdtTable->minutes, tdtTable->seconds);
+	printf("current time (UTC time)  |      %.2d:%.2d:%.2d\n", tdtTable->hours, tdtTable->minutes, tdtTable->seconds);
 	printf("MJD code                 |      %d\n", tdtTable->MJD);
     printf("\n********************TDT TABLE SECTION********************\n");
 
@@ -439,17 +444,19 @@ ParseErrorCode printTotTable(TotTable* totTable)
 
 	for (i = 0; i < totTable->descriptorsCount; i++)
 	{
-		printf("\t%d. descriptor:\n", i+1);
-		printf("\tdescriptor tag           |        %.2x\n", totTable->descriptors[i].descriptorTag);
-		printf("\tdescriptor length        |        %d\n", totTable->descriptors[i].descriptorLength);
+		printf("\n%d. descriptor:\n", i+1);
+		printf("descriptor tag           |        %.2x\n", totTable->descriptors[i].descriptorTag);
+		printf("descriptor length        |        %d\n", totTable->descriptors[i].descriptorLength);
 
 		for (j = 0; j < totTable->descriptors[i].numberOfInfos; j++)
 		{
-			printf("\t\t%d. LTO info\n", j+1);
-			printf("\t\tcounrty code              |        %.1x%.1x%.1x\n", totTable->descriptors[i].ltoInfo[j].countryCH1, totTable->descriptors[i].ltoInfo[j].countryCH2, totTable->descriptors[i].ltoInfo[j].countryCH3);
-			printf("\t\tcounrty region id         |        %d\n", totTable->descriptors[i].ltoInfo[j].countryRegionId);
-			printf("\t\tlocalTimeOffsetPolarity   |        %d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetPolarity);
-			printf("\t\tlocal time offset         |        %.2d:%.2d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetHours, totTable->descriptors[i].ltoInfo[j].localTimeOffsetMinutes);
+			printf("###########################################\n");
+			printf("%d. LTO info                              \n", j+1);
+			printf("counrty code              |        %.1x%.1x%.1x\n", totTable->descriptors[i].ltoInfo[j].countryCH1, totTable->descriptors[i].ltoInfo[j].countryCH2, totTable->descriptors[i].ltoInfo[j].countryCH3);
+			printf("counrty region id         |        %d\n", totTable->descriptors[i].ltoInfo[j].countryRegionId);
+			printf("localTimeOffsetPolarity   |        %d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetPolarity);
+			printf("local time offset         |        %.2d:%.2d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetHours, totTable->descriptors[i].ltoInfo[j].localTimeOffsetMinutes);
+			printf("###########################################\n");
 		}
 	}
 

@@ -25,7 +25,9 @@ if (x != 0)                                                                 \
 }
 void inputChannelNumber(uint16_t key);
 void changeChannel();
+void printCurrentTime();
 
+static void registerCurrentTime(TimeStructure* timeStructure);
 static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value);
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -39,6 +41,8 @@ static struct itimerspec timerSpec;
 static struct itimerspec timerSpecOld;
 static struct sigevent signalEvent;
 static int32_t timerFlags = 0;
+
+static TimeStructure startTime;
 
 
 int main()
@@ -65,6 +69,9 @@ int main()
     
     /* register remote controller callback */
     ERRORCHECK(registerRemoteControllerCallback(remoteControllerCallback));
+
+	/* register time callback */
+	ERRORCHECK(registerTimeCallback(registerCurrentTime));
 
 	/* initialize graphics controller module */
 	//ERRORCHECK(graphicsControllerInit());
@@ -113,7 +120,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
                 printf("Video pid: %d\n", channelInfo.videoPid);
                 printf("**********************************************************\n");
             }
-			//drawInfoRect();
+			printCurrentTime();
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
@@ -232,4 +239,26 @@ void changeChannel()
 	keys[2] = 0;
 }
 
+void registerCurrentTime(TimeStructure* timeStructure)
+{
+	startTime.hours = timeStructure->hours;
+	startTime.minutes = timeStructure->minutes;
+	startTime.seconds = timeStructure->seconds;
+	startTime.timeStampSeconds = timeStructure->timeStampSeconds;
+}
+void printCurrentTime()
+{
+	/*struct timeval tempTime;
 
+	gettimeofday(&tempTime, NULL);
+	time_t timeElapsed = tempTime.tv_sec - startTime.timeStampSeconds;
+
+	printf("seconds from epoch: %d\n", tempTime.tv_sec);
+	printf("start time seconds: %d\n", startTime.timeStampSeconds);
+
+	startTime.hours += timeElapsed % 3600;
+	startTime.minutes += timeElapsed % 60;
+	startTime.seconds += timeElapsed - (timeElapsed % 3600)*3600 - (timeElapsed % 60)*60;*/
+
+	printf("\nCurrent time: %.2x:%.2x:%.2x\n", startTime.hours, startTime.minutes, startTime.seconds);
+}

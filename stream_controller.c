@@ -20,6 +20,8 @@ static bool changeChannel = false;
 static int16_t programNumber = 0;
 static ChannelInfo currentChannel;
 static bool isInitialized = false;
+static bool timeTablesRecieved = false;
+static TimeCallback timeRecievedCallback = NULL;
 
 static struct timespec lockStatusWaitTime;
 static struct timeval now;
@@ -31,8 +33,10 @@ static void* streamControllerTask();
 static void removeWhiteSpaces(char* string);
 static void startChannel(int32_t channelNumber);
 static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo);
+static StreamControllerError parseTimeTables();
 
 static InitialInfo configFile;
+static TimeStructure startTime;
 
 StreamControllerError streamControllerInit()
 {
@@ -221,14 +225,45 @@ void startChannel(int32_t channelNumber)
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
 
-	/* free PMT table filter */
+	if (timeTablesRecieved == false)
+	{
+		parseTimeTables();
+	}
+}
+
+StreamControllerError parseTimeTables()
+{
+	struct timeval tempTime;
+
+	/* free previous table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
 
 	/* set demux filter for receive TDT table of program */
     if(Demux_Set_Filter(playerHandle, 0x0014, 0x70, &filterHandle))
 	{
 		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
-        return;
+        return SC_ERROR;
+	}
+
+	/* wait for a TDT table to be parsed*/
+    pthread_mutex_lock(&demuxMutex);
+	if (ETIMEDOUT == pthread_cond_wait(&demuxCond, &demuxMutex))
+	{
+		printf("\n%s : ERROR Lock timeout exceeded!\n", __FUNCTION__);
+        streamControllerDeinit();
+	}	
+	pthread_mutex_unlock(&demuxMutex);
+
+	gettimeofday(&tempTime, NULL);
+
+	/* free TDT table filter */
+    Demux_Free_Filter(playerHandle, filterHandle);
+
+	/* set demux filter for receive TOT table of program */
+    if(Demux_Set_Filter(playerHandle, 0x0014, 0x73, &filterHandle))
+	{
+		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
+        return SC_ERROR;
 	}
 
 	/* wait for a TDT table to be parsed*/
@@ -240,15 +275,56 @@ void startChannel(int32_t channelNumber)
 	}
 	pthread_mutex_unlock(&demuxMutex);
 
-	/* free TDT table filter */
-    Demux_Free_Filter(playerHandle, filterHandle);
+	uint8_t offsetHours = totTable->descriptors[0].ltoInfo[0].localTimeOffsetHours;
+	uint8_t offsetMinutes = totTable->descriptors[0].ltoInfo[0].localTimeOffsetMinutes;
+	uint8_t offsetHoursFirstDigit = offsetHours >> 4;
+	uint8_t offsetHoursSecondDigit = offsetHours & 0x0F;
+	uint8_t offsetMinutesFirstDigit = offsetMinutes >> 4;
+	uint8_t offsetMinutesSecondDigit = offsetMinutes & 0x0F;
 
-	/* set demux filter for receive TOT table of program */
-    if(Demux_Set_Filter(playerHandle, 0x0014, 0x73, &filterHandle))
+	if (totTable->descriptors[0].ltoInfo[0].localTimeOffsetPolarity == 0)
 	{
-		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
-        return;
+		startTime.hours = tdtTable->hours + 10*offsetHoursFirstDigit + offsetHoursSecondDigit;
+		startTime.minutes = tdtTable->minutes + 10*offsetMinutesFirstDigit + offsetMinutesSecondDigit;
+
+		if (startTime.hours > 0x17)
+		{
+			startTime.hours -= 0x18;
+		}
+
+		if (startTime.minutes > 0x3B)
+		{
+			startTime.minutes -= 0x3C;
+		}
 	}
+	else if (totTable->descriptors[0].ltoInfo[0].localTimeOffsetPolarity == 1)
+	{
+		if (offsetHours > startTime.hours)
+		{
+			startTime.hours = 24 - offsetHours;
+		}
+		else
+		{
+			startTime.hours -= offsetHours;
+		}
+
+		if (offsetMinutes > startTime.minutes)
+		{
+			startTime.hours = 60 - offsetMinutes;
+		}
+		else
+		{
+			startTime.minutes -= offsetMinutes;
+		}
+	}
+
+	startTime.seconds = tdtTable->seconds;
+	startTime.timeStampSeconds = tempTime.tv_sec;
+
+	printf("TIME TABLE PARSED!\n");
+	timeRecievedCallback(&startTime);
+
+	timeTablesRecieved = true;
 }
 
 void* streamControllerTask()
@@ -441,7 +517,7 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 
 		if (parseTdtTable(buffer, tdtTable) == TABLES_PARSE_OK)
 		{
-			//printTdtTable(tdtTable);
+			printTdtTable(tdtTable);
 			pthread_mutex_lock(&demuxMutex);
 		    pthread_cond_signal(&demuxCond);
 		    pthread_mutex_unlock(&demuxMutex);
@@ -449,11 +525,14 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 	}
 	else if (tableId == 0x73)
 	{
-		printf("\n%s -----TOT TABLE ARRIVED-----\n",__FUNCTION__);
+		//printf("\n%s -----TOT TABLE ARRIVED-----\n",__FUNCTION__);
 
 		if (parseTotTable(buffer, totTable) == TABLES_PARSE_OK)
 		{
 			printTotTable(totTable);
+			pthread_mutex_lock(&demuxMutex);
+		    pthread_cond_signal(&demuxCond);
+		    pthread_mutex_unlock(&demuxMutex);
 		}
 	}
 
@@ -489,7 +568,7 @@ StreamControllerError loadInitialInfo()
 	return SC_NO_ERROR;
 }
 
-static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo)
+StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo)
 {
 	FILE* inputFile;
 	char singleLine[LINE_LENGTH];
@@ -579,5 +658,20 @@ void changeChannelKey(int32_t channelNumber)
 	if ((channelNumber > -1) && (channelNumber < patTable->serviceInfoCount))
 	{
 		startChannel(channelNumber);
+	}
+}
+
+StreamControllerError registerTimeCallback(TimeCallback timeCallback)
+{
+	if (timeCallback == NULL)
+	{
+		printf("Error registring time callback!\n");
+		return SC_ERROR;
+	}
+	else
+	{
+		printf("Time callback function registered!\n");
+		timeRecievedCallback = timeCallback;
+		return SC_NO_ERROR;
 	}
 }
