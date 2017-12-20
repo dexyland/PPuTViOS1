@@ -114,7 +114,8 @@ typedef struct _LTODescriptorInfo
 	uint8_t countryCH3;
 	uint8_t countryRegionId;
 	uint8_t localTimeOffsetPolarity;
-	uint16_t localTimeOffset;
+	uint8_t localTimeOffsetHours;
+	uint8_t localTimeOffsetMinutes;
 }LTODescriptorInfo;
 
 /**
