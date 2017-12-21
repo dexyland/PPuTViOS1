@@ -388,11 +388,7 @@ ParseErrorCode parseTotTable(const uint8_t* totSectionBuffer, TotTable* totTable
 
 	lower8Bits = (uint8_t) *(totSectionBuffer + 7);
 	totTable->seconds = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
-/*
-	totTable->hours = (uint8_t) *(totSectionBuffer + 5);
-	totTable->minutes = (uint8_t) *(totSectionBuffer + 6);
-	totTable->seconds = (uint8_t) *(totSectionBuffer + 7);
-*/
+
 	higher8Bits = (uint8_t) *(totSectionBuffer + 8);
 	lower8Bits = (uint8_t) *(totSectionBuffer + 9);
 	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);

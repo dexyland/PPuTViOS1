@@ -75,7 +75,7 @@ int main()
 	ERRORCHECK(registerTimeCallback(registerCurrentTime));
 
 	/* initialize graphics controller module */
-	//ERRORCHECK(graphicsControllerInit());
+	ERRORCHECK(graphicsControllerInit());
 
     /* initialize stream controller module */
     ERRORCHECK(streamControllerInit());
@@ -87,13 +87,6 @@ int main()
 		printf("\n%s : ERROR Lock timeout exceeded!\n", __FUNCTION__);
 	}
 	pthread_mutex_unlock(&deinitMutex);
-
-	timer_delete(keyTimer);
-
-	/* deinitialize graphics controller module */
-	//ERRORCHECK(graphicsControllerDeinit());
-
-	//printf("Grafika deinit\n");
     
     /* unregister remote controller callback */
     ERRORCHECK(unregisterRemoteControllerCallback(remoteControllerCallback));
@@ -103,7 +96,12 @@ int main()
 
     /* deinitialize stream controller module */
     ERRORCHECK(streamControllerDeinit());
-  
+
+	/* deinitialize graphics controller module */
+	ERRORCHECK(graphicsControllerDeinit());
+
+	timer_delete(keyTimer);
+
     return 0;
 }
 
@@ -122,10 +120,12 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
                 printf("**********************************************************\n");
             }
 			printCurrentTime();
+			drawInfoRect();
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
             channelUp();
+			drawProgramNumber();
 			break;
 		case KEYCODE_P_MINUS:
 		    printf("\nCH- pressed\n");
