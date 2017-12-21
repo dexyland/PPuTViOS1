@@ -8,6 +8,8 @@
 static IDirectFBSurface* primary = NULL;
 static IDirectFB* dfbInterface = NULL;
 static DFBSurfaceDescription surfaceDesc;
+static DFBFontDescription fontDesc;
+static IDirectFBFont* fontInterface = NULL;
 static int32_t screenWidth = 0;
 static int32_t screenHeight = 0;
 static uint8_t stopDrawing = 0;
@@ -39,6 +41,10 @@ static void renderThread();
 static void setTimerParams();
 static void wipeScreen();
 
+static uint8_t hoursToDraw = 0;
+static uint8_t minutesToDraw = 0;
+static int16_t audioPidToDraw = 0;
+static int16_t videoPidToDraw = 0;
 
 /* helper macro for error checking */
 #define DFBCHECK(x...)                                      \
@@ -66,6 +72,7 @@ GraphicsControllerError graphicsControllerInit()
 	componentsToDraw.showProgramNumber = false;
 	componentsToDraw.showVolume = false;
 	componentsToDraw.showInfo = false;
+	componentsToDraw.showChannelDial = false;
 	componentsToDraw.programNumber = 0;
 	componentsToDraw.volume = 0;
 
@@ -94,6 +101,9 @@ GraphicsControllerError graphicsControllerInit()
 	{
 		return GC_ERROR;
 	}
+
+	DFBCHECK(dfbInterface->CreateFont(dfbInterface, "/home/galois/fonts/DejaVuSans.ttf", &fontDesc, &fontInterface));
+	DFBCHECK(primary->SetFont(primary, fontInterface));
 
 	/* clear the screen before drawing anything */
 	wipeScreen();
@@ -154,10 +164,27 @@ void renderThread()
 
 		if (componentsToDraw.showInfo)
 		{
-			primary->SetColor(primary, 0xFF, 0x00, 0x00, 0xFF);
+			primary->SetColor(primary, 0xFF, 0x00, 0x00, 0xCF);
     		primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 8*screenWidth/10, 17*screenHeight/20);
+			//printf("LOG1\n");
+			char tempString[10];
+
+			fontDesc.flags = DFDESC_HEIGHT;
+			fontDesc.height = 100;
+
+			DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF));
+
+			sprintf(tempString, "%d", audioPidToDraw);
+			//printf("LOG2\n");
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/10, 3*screenHeight/4 + 100/2, DSTF_CENTER));
+			//printf("LOG3\n");
 		}
 
+		if (componentsToDraw.showChannelDial)
+		{
+			//primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF);
+			//primary->FillCircle(primary)
+		}
 		DFBCHECK(primary->Flip(primary, NULL, 0));
 	}
 }
@@ -165,7 +192,7 @@ void renderThread()
 void wipeScreen()
 {
     /* clear screen */
-    DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xff));
+    DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00));
     DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
     
     /* update screen */
@@ -186,9 +213,15 @@ void drawVolumeBar()
 	componentsToDraw.showVolume = true;
 }
 
-void drawInfoRect()
+void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid)
 {
 	timer_settime(infoTimer, timerFlags, &infoTimerSpec, &infoTimerSpecOld);
+
+	audioPidToDraw = audioPid;
+	videoPidToDraw = videoPid;
+	hoursToDraw = hours;
+	minutesToDraw = minutes;
+	
 	componentsToDraw.showInfo = true;
 }
 
@@ -244,5 +277,10 @@ void removeVolumeBar()
 void removeInfo()
 {
 	componentsToDraw.showInfo = false;
+}
+
+void removeChannelDial()
+{
+	componentsToDraw.showChannelDial = false;
 }
 

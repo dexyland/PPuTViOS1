@@ -44,7 +44,7 @@ static int32_t timerFlags = 0;
 
 static TimeStructure startTime;
 static bool timeRecieved = false;
-
+TimeStructure currentTime;
 
 int main()
 {
@@ -120,7 +120,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
                 printf("**********************************************************\n");
             }
 			printCurrentTime();
-			drawInfoRect();
+			drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid);
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
@@ -232,7 +232,7 @@ void changeChannel()
 		channel = 100*keys[0] + 10*keys[1] + keys[2];
 	}
 
-	changeChannelKey(channel);
+	changeChannelKey(--channel);
 
 	keysPressed = 0;
 	keys[0] = 0;
@@ -253,7 +253,6 @@ void printCurrentTime()
 	if (timeRecieved == true)
 	{	
 		struct timeval tempTime;
-		TimeStructure currentTime;
 
 		gettimeofday(&tempTime, NULL);
 		time_t timeElapsed = tempTime.tv_sec - startTime.timeStampSeconds;
