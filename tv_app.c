@@ -43,6 +43,7 @@ static struct sigevent signalEvent;
 static int32_t timerFlags = 0;
 
 static TimeStructure startTime;
+static bool timeRecieved = false;
 
 
 int main()
@@ -245,20 +246,49 @@ void registerCurrentTime(TimeStructure* timeStructure)
 	startTime.minutes = timeStructure->minutes;
 	startTime.seconds = timeStructure->seconds;
 	startTime.timeStampSeconds = timeStructure->timeStampSeconds;
+	timeRecieved = true;
 }
 void printCurrentTime()
 {
-	/*struct timeval tempTime;
+	if (timeRecieved == true)
+	{	
+		struct timeval tempTime;
+		TimeStructure currentTime;
 
-	gettimeofday(&tempTime, NULL);
-	time_t timeElapsed = tempTime.tv_sec - startTime.timeStampSeconds;
+		gettimeofday(&tempTime, NULL);
+		time_t timeElapsed = tempTime.tv_sec - startTime.timeStampSeconds;
 
-	printf("seconds from epoch: %d\n", tempTime.tv_sec);
-	printf("start time seconds: %d\n", startTime.timeStampSeconds);
+		printf("start time seconds: %d\n", timeElapsed);
 
-	startTime.hours += timeElapsed % 3600;
-	startTime.minutes += timeElapsed % 60;
-	startTime.seconds += timeElapsed - (timeElapsed % 3600)*3600 - (timeElapsed % 60)*60;*/
+		uint8_t hoursPassed = (timeElapsed - timeElapsed % 3600) / 3600;
+		uint8_t minutesPassed = (timeElapsed - hoursPassed*3600 - timeElapsed % 60) / 60;
+		uint8_t secondsPassed = timeElapsed - hoursPassed*3600 - minutesPassed*60;
 
-	printf("\nCurrent time: %.2x:%.2x:%.2x\n", startTime.hours, startTime.minutes, startTime.seconds);
+		currentTime.hours = startTime.hours + hoursPassed;
+		currentTime.minutes = startTime.minutes + minutesPassed;
+		currentTime.seconds = startTime.seconds + secondsPassed;
+
+		if (currentTime.seconds > 59)
+		{
+			currentTime.seconds -= 60;
+			currentTime.minutes++;
+		}
+
+		if (currentTime.minutes > 59)
+		{
+			currentTime.minutes -= 60;
+			currentTime.hours++;
+		}
+
+		if (currentTime.hours > 23)
+		{
+			currentTime.hours -= 24;
+		}
+
+		printf("\nCurrent time: %.2d:%.2d:%.2d\n", currentTime.hours, currentTime.minutes, currentTime.seconds);
+	}
+	else
+	{
+		printf("Time not available!\n");
+	}
 }

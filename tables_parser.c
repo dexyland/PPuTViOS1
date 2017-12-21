@@ -324,13 +324,13 @@ ParseErrorCode parseTdtTable(const uint8_t* tdtSectionBuffer, TdtTable* tdtTable
 	tdtTable->MJD = all16Bits;
 
 	lower8Bits = (uint8_t) *(tdtSectionBuffer + 5);
-	tdtTable->hours = 16*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+	tdtTable->hours = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
 	lower8Bits = (uint8_t) *(tdtSectionBuffer + 6);
-	tdtTable->minutes = 16*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+	tdtTable->minutes = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
 	lower8Bits = (uint8_t) *(tdtSectionBuffer + 7);
-	tdtTable->seconds = 16*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+	tdtTable->seconds = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
 	return TABLES_PARSE_OK;
 }
@@ -380,10 +380,19 @@ ParseErrorCode parseTotTable(const uint8_t* totSectionBuffer, TotTable* totTable
 	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
 	totTable->MJD = all16Bits;
 
+	lower8Bits = (uint8_t) *(totSectionBuffer + 5);
+	totTable->hours = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+
+	lower8Bits = (uint8_t) *(totSectionBuffer + 6);
+	totTable->minutes = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+
+	lower8Bits = (uint8_t) *(totSectionBuffer + 7);
+	totTable->seconds = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+/*
 	totTable->hours = (uint8_t) *(totSectionBuffer + 5);
 	totTable->minutes = (uint8_t) *(totSectionBuffer + 6);
 	totTable->seconds = (uint8_t) *(totSectionBuffer + 7);
-
+*/
 	higher8Bits = (uint8_t) *(totSectionBuffer + 8);
 	lower8Bits = (uint8_t) *(totSectionBuffer + 9);
 	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
@@ -439,7 +448,7 @@ ParseErrorCode printTotTable(TotTable* totTable)
     printf("\n********************TOT TABLE SECTION********************\n");
     printf("table_id                 |      %.2x\n",totTable->tableId);
     printf("section_length           |      %d\n",totTable->sectionLength);
-	printf("current time (UTC time)  |      %.2x:%.2x:%.2x\n", totTable->hours, totTable->minutes, totTable->seconds);
+	printf("current time (UTC time)  |      %.2d:%.2d:%.2d\n", totTable->hours, totTable->minutes, totTable->seconds);
 	printf("MJD code                 |      %d\n", totTable->MJD);
 
 	for (i = 0; i < totTable->descriptorsCount; i++)

@@ -277,24 +277,25 @@ StreamControllerError parseTimeTables()
 
 	uint8_t offsetHours = totTable->descriptors[0].ltoInfo[0].localTimeOffsetHours;
 	uint8_t offsetMinutes = totTable->descriptors[0].ltoInfo[0].localTimeOffsetMinutes;
-	uint8_t offsetHoursFirstDigit = offsetHours >> 4;
-	uint8_t offsetHoursSecondDigit = offsetHours & 0x0F;
-	uint8_t offsetMinutesFirstDigit = offsetMinutes >> 4;
-	uint8_t offsetMinutesSecondDigit = offsetMinutes & 0x0F;
+
+	startTime.hours = tdtTable->hours;
+	startTime.minutes = tdtTable->minutes;
+	startTime.seconds = tdtTable->seconds;
+	startTime.timeStampSeconds = tempTime.tv_sec;
 
 	if (totTable->descriptors[0].ltoInfo[0].localTimeOffsetPolarity == 0)
 	{
-		startTime.hours = tdtTable->hours + 10*offsetHoursFirstDigit + offsetHoursSecondDigit;
-		startTime.minutes = tdtTable->minutes + 10*offsetMinutesFirstDigit + offsetMinutesSecondDigit;
+		startTime.hours += offsetHours;
+		startTime.minutes += offsetMinutes;
 
-		if (startTime.hours > 0x17)
+		if (startTime.hours > 23)
 		{
-			startTime.hours -= 0x18;
+			startTime.hours -= 24;
 		}
 
-		if (startTime.minutes > 0x3B)
+		if (startTime.minutes > 59)
 		{
-			startTime.minutes -= 0x3C;
+			startTime.minutes -= 60;
 		}
 	}
 	else if (totTable->descriptors[0].ltoInfo[0].localTimeOffsetPolarity == 1)
@@ -318,10 +319,6 @@ StreamControllerError parseTimeTables()
 		}
 	}
 
-	startTime.seconds = tdtTable->seconds;
-	startTime.timeStampSeconds = tempTime.tv_sec;
-
-	printf("TIME TABLE PARSED!\n");
 	timeRecievedCallback(&startTime);
 
 	timeTablesRecieved = true;
@@ -517,7 +514,7 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 
 		if (parseTdtTable(buffer, tdtTable) == TABLES_PARSE_OK)
 		{
-			printTdtTable(tdtTable);
+			//printTdtTable(tdtTable);
 			pthread_mutex_lock(&demuxMutex);
 		    pthread_cond_signal(&demuxCond);
 		    pthread_mutex_unlock(&demuxMutex);
@@ -529,7 +526,7 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 
 		if (parseTotTable(buffer, totTable) == TABLES_PARSE_OK)
 		{
-			printTotTable(totTable);
+			//printTotTable(totTable);
 			pthread_mutex_lock(&demuxMutex);
 		    pthread_cond_signal(&demuxCond);
 		    pthread_mutex_unlock(&demuxMutex);
