@@ -563,9 +563,9 @@ int32_t tunerStatusCallback(t_LockStatus status)
     return 0;
 }
 
-StreamControllerError loadInitialInfo()
+StreamControllerError loadInitialInfo(char* fileName)
 {
-	if (loadConfigFile("config.ini", &configFile))
+	if (loadConfigFile(fileName, &configFile))
 	{
 		printf("ERROR loading configuration file!\n");
 		return SC_ERROR;

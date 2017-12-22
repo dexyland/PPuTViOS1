@@ -49,7 +49,7 @@ TimeStructure currentTime;
 
 static currentVolume = 5;
 
-int main()
+int main(int argc, char *argv[])
 {
 	signalEvent.sigev_notify = SIGEV_THREAD;
 	signalEvent.sigev_notify_function = changeChannel;
@@ -62,7 +62,7 @@ int main()
 	timerSpec.it_value.tv_nsec = 0;
 
 	/* load initial info from config.ini file */
-	if (loadInitialInfo())
+	if (loadInitialInfo(argv[1]) || argc == 1)
 	{
 		printf("Initial info required!\n");
 		return -1;
@@ -140,17 +140,18 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		case KEYCODE_V_PLUS:
 			printf("\nV+ pressed\n");
 			volumeUp();
-			printf("\nCurrent volume : %d", currentVolume);
+			printf("\nCurrent volume : %d\n", currentVolume);
 			break;
 		case KEYCODE_V_MINUS:
 			printf("\nV- pressed\n");
 			volumeDown();
-			printf("\nCurrent volume : %d", currentVolume);
+			printf("\nCurrent volume : %d\n", currentVolume);
 			break;
 		case KEYCODE_MUTE:
 			printf("\nMUTE pressed\n");
 			volumeMute();
 			currentVolume = 0;
+			printf("\nCurrent volume : %d\n", currentVolume);
 			break;
 		case KEYCODE_EXIT:
 			printf("\nExit pressed\n");

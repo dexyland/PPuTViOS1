@@ -122,9 +122,10 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 /**
  * @brief Loads config.ini file holding initial info
  *
+ * @param [in] fileName - name of file to be loaded
  * @return stream conotroller error code
  */
-StreamControllerError loadInitialInfo();
+StreamControllerError loadInitialInfo(char fileName[]);
 
 /**
  * @brief changes current program to channelNumber
