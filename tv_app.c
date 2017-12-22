@@ -29,6 +29,7 @@ void printCurrentTime();
 
 static void registerCurrentTime(TimeStructure* timeStructure);
 static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value);
+static void registerCurrentVolume(uint8_t volumeValue);
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
@@ -45,6 +46,8 @@ static int32_t timerFlags = 0;
 static TimeStructure startTime;
 static bool timeRecieved = false;
 TimeStructure currentTime;
+
+static currentVolume = 5;
 
 int main()
 {
@@ -73,6 +76,9 @@ int main()
 
 	/* register time callback */
 	ERRORCHECK(registerTimeCallback(registerCurrentTime));
+
+	/* register volume callback */
+	ERRORCHECK(registerVolumeCallback(registerCurrentVolume));
 
 	/* initialize graphics controller module */
 	ERRORCHECK(graphicsControllerInit());
@@ -130,6 +136,21 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		case KEYCODE_P_MINUS:
 		    printf("\nCH- pressed\n");
             channelDown();
+			break;
+		case KEYCODE_V_PLUS:
+			printf("\nV+ pressed\n");
+			volumeUp();
+			printf("\nCurrent volume : %d", currentVolume);
+			break;
+		case KEYCODE_V_MINUS:
+			printf("\nV- pressed\n");
+			volumeDown();
+			printf("\nCurrent volume : %d", currentVolume);
+			break;
+		case KEYCODE_MUTE:
+			printf("\nMUTE pressed\n");
+			volumeMute();
+			currentVolume = 0;
 			break;
 		case KEYCODE_EXIT:
 			printf("\nExit pressed\n");
@@ -248,6 +269,7 @@ void registerCurrentTime(TimeStructure* timeStructure)
 	startTime.timeStampSeconds = timeStructure->timeStampSeconds;
 	timeRecieved = true;
 }
+
 void printCurrentTime()
 {
 	if (timeRecieved == true)
@@ -290,4 +312,9 @@ void printCurrentTime()
 	{
 		printf("Time not available!\n");
 	}
+}
+
+void registerCurrentVolume(uint8_t volumeValue)
+{
+	currentVolume = volumeValue;
 }

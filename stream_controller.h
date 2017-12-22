@@ -65,10 +65,23 @@ typedef void(*TimeCallback)(TimeStructure* timeStructure);
 /*
  * @brief Registers time callback
  *
- * @param  [in] time callback - pointer to time callback function
+ * @param  [in] timeCallback - pointer to time callback function
  * @return Stream controller error code
  */
 StreamControllerError registerTimeCallback(TimeCallback timeCallback);
+
+/**
+ * @brief Volume value callback
+ */
+typedef void(*VolumeCallback)(uint8_t currentVolume);
+
+/*
+ * @brief Registers volume callback
+ *
+ * @param  [in]  volumeCallback - pointer to volume callback function
+ * @return Stream controller error code
+ */
+StreamControllerError registerVolumeCallback(VolumeCallback volumeCallback);
 
 /**
  * @brief Initializes stream controller module
@@ -114,8 +127,23 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 StreamControllerError loadInitialInfo();
 
 /**
- * @brief 
+ * @brief changes current program to channelNumber
  */
 void changeChannelKey(int32_t channelNumber);
+
+/**
+ * @brief Increases current volume value
+ */
+void volumeUp();
+
+/**
+ * @brief Decreases current volume value
+ */
+void volumeDown();
+
+/**
+ * @brief Sets current volume value to zero
+ */
+void volumeMute();
 
 #endif /* __STREAM_CONTROLLER_H__ */

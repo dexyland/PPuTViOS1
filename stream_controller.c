@@ -21,7 +21,9 @@ static int16_t programNumber = 0;
 static ChannelInfo currentChannel;
 static bool isInitialized = false;
 static bool timeTablesRecieved = false;
+
 static TimeCallback timeRecievedCallback = NULL;
+static VolumeCallback volumeReportCallback = NULL;
 
 static struct timespec lockStatusWaitTime;
 static struct timeval now;
@@ -37,6 +39,9 @@ static StreamControllerError parseTimeTables();
 
 static InitialInfo configFile;
 static TimeStructure startTime;
+
+static uint32_t currentVolume = 5;
+static uint32_t volumeConstant = 160400000;
 
 StreamControllerError streamControllerInit()
 {
@@ -414,7 +419,7 @@ void* streamControllerTask()
     pthread_mutex_unlock(&statusMutex);
    
     /* initialize player */
-    if(Player_Init(&playerHandle))
+    if (Player_Init(&playerHandle))
     {
 		printf("\n%s : ERROR Player_Init() fail\n", __FUNCTION__);
 		free(patTable);
@@ -424,9 +429,15 @@ void* streamControllerTask()
         Tuner_Deinit();
         return (void*) SC_ERROR;
 	}
+
+	/* set initial volume value */
+	if (Player_Volume_Set(playerHandle, currentVolume*volumeConstant))
+	{
+		printf("\n%sError setting volume", __FUNCTION__);
+	}
 	
 	/* open source */
-	if(Player_Source_Open(playerHandle, &sourceHandle))
+	if (Player_Source_Open(playerHandle, &sourceHandle))
     {
 		printf("\n%s : ERROR Player_Source_Open() fail\n", __FUNCTION__);
 		free(patTable);
@@ -671,4 +682,59 @@ StreamControllerError registerTimeCallback(TimeCallback timeCallback)
 		timeRecievedCallback = timeCallback;
 		return SC_NO_ERROR;
 	}
+}
+
+StreamControllerError registerVolumeCallback(VolumeCallback volumeCallback)
+{
+	if (volumeCallback == NULL)
+	{
+		printf("Error registring volume callback!\n");
+		return SC_ERROR;
+	}
+	else
+	{
+		printf("Volume callback function registered!\n");
+		volumeReportCallback = volumeCallback;
+		return SC_NO_ERROR;
+	}
+}
+
+void volumeUp()
+{
+	if (++currentVolume > 10)
+	{
+		currentVolume = 10;
+	}
+
+	if (Player_Volume_Set(playerHandle, currentVolume*volumeConstant))
+	{
+		printf("\n%sError changing volume", __FUNCTION__);
+	}
+
+	volumeReportCallback(currentVolume);
+}
+
+void volumeDown()
+{
+	if (currentVolume > 0)
+	{
+		currentVolume--;
+	}
+
+	if (Player_Volume_Set(playerHandle, currentVolume*volumeConstant))
+	{
+		printf("\n%sError changing volume", __FUNCTION__);
+	}
+
+	volumeReportCallback(currentVolume);
+}
+
+void volumeMute()
+{
+	if (Player_Volume_Set(playerHandle, 0))
+	{
+		printf("\n%sError changing volume", __FUNCTION__);
+	}
+
+	currentVolume = 0;
 }
