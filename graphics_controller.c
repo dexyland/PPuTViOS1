@@ -102,6 +102,9 @@ GraphicsControllerError graphicsControllerInit()
 		return GC_ERROR;
 	}
 
+	fontDesc.flags = DFDESC_HEIGHT;
+	fontDesc.height = 40;
+
 	DFBCHECK(dfbInterface->CreateFont(dfbInterface, "/home/galois/fonts/DejaVuSans.ttf", &fontDesc, &fontInterface));
 	DFBCHECK(primary->SetFont(primary, fontInterface));
 
@@ -152,7 +155,7 @@ void renderThread()
 		
 		if (componentsToDraw.showProgramNumber)
 		{
-			primary->SetColor(primary, 0xFF, 0x00, 0xFF, 0xFF);
+			primary->SetColor(primary, 0x00, 0x00, 0xFF, 0xFF);
     		primary->FillRectangle(primary, screenWidth/10, screenHeight/6, 3*screenWidth/10, 2*screenHeight/6);
 		}
 
@@ -218,20 +221,33 @@ void renderThread()
 
 		if (componentsToDraw.showInfo)
 		{
-			primary->SetColor(primary, 0xFF, 0x00, 0x00, 0xCF);
-    		primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 8*screenWidth/10, 17*screenHeight/20);
-			//printf("LOG1\n");
-			char tempString[10];
+			primary->SetColor(primary, 0x00, 0x66, 0x99, 0xEF);
+    		primary->FillRectangle(primary, screenWidth/10 - 20, 3*screenHeight/4 - 20, 8*screenWidth/10 + 40, screenHeight/5 + 40);
+			primary->SetColor(primary, 0xB3, 0xE6, 0xFF, 0xEF);
+    		primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 8*screenWidth/10, screenHeight/5);
 
-			fontDesc.flags = DFDESC_HEIGHT;
-			fontDesc.height = 100;
+			char tempString[10];
 
 			DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF));
 
-			sprintf(tempString, "%d", audioPidToDraw);
-			//printf("LOG2\n");
-			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/10, 3*screenHeight/4 + 100/2, DSTF_CENTER));
-			//printf("LOG3\n");
+			sprintf(tempString, "Video PID : %d", videoPidToDraw);
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 40, DSTF_LEFT));
+
+			sprintf(tempString, "Audio PID : %d", audioPidToDraw);
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 80, DSTF_LEFT));
+
+			if (hoursToDraw == 30)
+			{
+				sprintf(tempString, "Time not available");
+			}
+			else
+			{
+				sprintf(tempString, "%.2d:%.2d", hoursToDraw, minutesToDraw);
+			}
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, screenHeight - 60, DSTF_LEFT));
 		}
 
 		if (componentsToDraw.showChannelDial)

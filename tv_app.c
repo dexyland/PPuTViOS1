@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
 	timerSpec.it_value.tv_sec = 2;
 	timerSpec.it_value.tv_nsec = 0;
 
+	currentTime.hours = 30;
+
 	/* load initial info from config.ini file */
 	if (loadInitialInfo(argv[1]) || argc == 1)
 	{
@@ -80,11 +82,11 @@ int main(int argc, char *argv[])
 	/* register volume callback */
 	ERRORCHECK(registerVolumeCallback(registerCurrentVolume));
 
-	/* initialize graphics controller module */
-	ERRORCHECK(graphicsControllerInit());
-
     /* initialize stream controller module */
     ERRORCHECK(streamControllerInit());
+
+	/* initialize graphics controller module */
+	ERRORCHECK(graphicsControllerInit());
 
     /* wait for a EXIT remote controller key press event */
     pthread_mutex_lock(&deinitMutex);
@@ -100,11 +102,11 @@ int main(int argc, char *argv[])
     /* deinitialize remote controller module */
     ERRORCHECK(remoteControllerDeinit());
 
-    /* deinitialize stream controller module */
-    ERRORCHECK(streamControllerDeinit());
-
 	/* deinitialize graphics controller module */
 	ERRORCHECK(graphicsControllerDeinit());
+
+    /* deinitialize stream controller module */
+    ERRORCHECK(streamControllerDeinit());
 
 	timer_delete(keyTimer);
 
