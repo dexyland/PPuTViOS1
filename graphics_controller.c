@@ -158,8 +158,62 @@ void renderThread()
 
 		if (componentsToDraw.showVolume)
 		{
-			primary->SetColor(primary, 0x00, 0xFF, 0x00, 0xFF);
-    		primary->FillRectangle(primary, 7*screenWidth/10, screenHeight/6, 9*screenWidth/10, 2*screenHeight/6);
+			/* draw image from file */
+			IDirectFBImageProvider *provider;
+			IDirectFBSurface *logoSurface = NULL;
+			int32_t logoHeight, logoWidth;
+
+    		/* create the image provider for the specified file */
+			switch (componentsToDraw.volume)
+			{
+				case 0:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_0.png", &provider));
+					break;
+				case 1:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_1.png", &provider));
+					break;
+				case 2:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_2.png", &provider));
+					break;
+				case 3:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_3.png", &provider));
+					break;
+				case 4:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_4.png", &provider));
+					break;
+				case 5:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_5.png", &provider));
+					break;
+				case 6:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_6.png", &provider));
+					break;
+				case 7:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_7.png", &provider));
+					break;
+				case 8:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_8.png", &provider));
+					break;
+				case 9:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_9.png", &provider));
+					break;
+				case 10:
+					DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_10.png", &provider));
+					break;
+			}
+
+    		/* get surface descriptor for the surface where the image will be rendered */
+			DFBCHECK(provider->GetSurfaceDescription(provider, &surfaceDesc));
+    		/* create the surface for the image */
+			DFBCHECK(dfbInterface->CreateSurface(dfbInterface, &surfaceDesc, &logoSurface));
+    		/* render the image to the surface */
+			DFBCHECK(provider->RenderTo(provider, logoSurface, NULL));
+	
+    		/* cleanup the provider after rendering the image to the surface */
+			provider->Release(provider);
+	
+    		/* fetch the logo size and add (blit) it to the screen */
+			DFBCHECK(logoSurface->GetSize(logoSurface, &logoWidth, &logoHeight));
+			DFBCHECK(primary->Blit(primary, logoSurface, NULL, screenWidth - logoWidth - 100, 50));
 		}
 
 		if (componentsToDraw.showInfo)
@@ -182,8 +236,6 @@ void renderThread()
 
 		if (componentsToDraw.showChannelDial)
 		{
-			//primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF);
-			//primary->FillCircle(primary)
 		}
 		DFBCHECK(primary->Flip(primary, NULL, 0));
 	}
@@ -194,9 +246,6 @@ void wipeScreen()
     /* clear screen */
     DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00));
     DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
-    
-    /* update screen */
-   	//DFBCHECK(primary->Flip(primary, NULL, 0));
 }
 
 void drawProgramNumber()
@@ -206,9 +255,9 @@ void drawProgramNumber()
 	componentsToDraw.showProgramNumber = true;
 }
 
-void drawVolumeBar()
+void drawVolumeBar(uint8_t volumeValue)
 {
-
+	componentsToDraw.volume = volumeValue;
 	timer_settime(volumeTimer, timerFlags, &volumeTimerSpec, &volumeTimerSpecOld);
 	componentsToDraw.showVolume = true;
 }
@@ -283,4 +332,3 @@ void removeChannelDial()
 {
 	componentsToDraw.showChannelDial = false;
 }
-

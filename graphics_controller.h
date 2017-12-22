@@ -54,7 +54,7 @@ void drawProgramNumber();
  *
  * @return graphics controller error code
  */
-void drawVolumeBar();
+void drawVolumeBar(uint8_t volumeValue);
 
 /**
  * @brief Deinitializes graphics controller module
