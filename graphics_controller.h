@@ -48,7 +48,7 @@ GraphicsControllerError graphicsControllerDeinit();
  *
  * @return graphics controller error code
  */
-void drawProgramNumber();
+void drawProgramNumber(int16_t programNumber);
 
 /**
  * @brief Deinitializes graphics controller module

@@ -137,11 +137,18 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
             channelUp();
-			drawProgramNumber();
+			if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
+            {
+				drawProgramNumber(channelInfo.programNumber);
+			}
 			break;
 		case KEYCODE_P_MINUS:
 		    printf("\nCH- pressed\n");
             channelDown();
+			if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
+            {
+				drawProgramNumber(channelInfo.programNumber);
+			}
 			break;
 		case KEYCODE_V_PLUS:
 			printf("\nV+ pressed\n");

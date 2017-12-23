@@ -176,6 +176,12 @@ void* renderThread()
 		{
 			primary->SetColor(primary, 0x00, 0x00, 0xFF, 0xFF);
     		primary->FillRectangle(primary, screenWidth/10, screenHeight/6, 3*screenWidth/10, 2*screenHeight/6);
+
+			primary->SetColor(primary, 0xFF, 0xFF, 0x00, 0xEF);
+
+			sprintf(tempString, "%d", componentsToDraw.programNumber);
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/10 + 50, screenHeight/6 + 100, DSTF_LEFT));
 		}
 
 		if (componentsToDraw.showVolume)
@@ -315,9 +321,9 @@ void wipeScreen()
     DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
 }
 
-void drawProgramNumber()
+void drawProgramNumber(int16_t programNumber)
 {
-
+	componentsToDraw.programNumber = programNumber;
 	timer_settime(programNumberTimer, timerFlags, &programTimerSpec, &programTimerSpecOld);
 	componentsToDraw.showProgramNumber = true;
 }

@@ -7,6 +7,9 @@ static TotTable *totTable;
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
 
+static pthread_cond_t initCond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t initMutex = PTHREAD_MUTEX_INITIALIZER;
+
 static int32_t sectionReceivedCallback(uint8_t *buffer);
 static int32_t tunerStatusCallback(t_LockStatus status);
 
@@ -57,6 +60,10 @@ StreamControllerError streamControllerInit()
 
 StreamControllerError streamControllerDeinit()
 {
+    pthread_mutex_lock(&initMutex);
+	pthread_cond_wait(&initCond, &initMutex);
+	pthread_mutex_unlock(&initMutex);
+	
     if (!isInitialized) 
     {
         printf("\n%s : ERROR streamControllerDeinit() fail, module is not initialized!\n", __FUNCTION__);
@@ -483,6 +490,10 @@ void* streamControllerTask()
     
     /* set isInitialized flag */
     isInitialized = true;
+
+    pthread_mutex_lock(&initMutex);
+    pthread_cond_signal(&initCond);
+    pthread_mutex_unlock(&initMutex);
 
     while(!threadExit)
     {
