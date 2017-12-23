@@ -52,6 +52,9 @@ static IDirectFBSurface *logoSurface = NULL;
 static int32_t logoHeight;
 static int32_t logoWidth;
 
+static int32_t numberOfKeys;
+static int32_t keysToShow[3];
+
 static pthread_cond_t graphicsCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t graphicsMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -126,11 +129,6 @@ GraphicsControllerError graphicsControllerInit()
         printf("Error creating input event task!\n");
         return GC_THREAD_ERROR;
     }
-	else
-	{
-		printf("Render thread created!\n");
-	}
-
 
 	return GC_NO_ERROR;
 }
@@ -244,7 +242,7 @@ void* renderThread()
 
 			sprintf(tempString, "RADIO");
 
-			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2, screenHeight/2, DSTF_LEFT));
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 25, screenHeight/2, DSTF_LEFT));
 		}
 
 		if (componentsToDraw.showInfo)
@@ -278,6 +276,29 @@ void* renderThread()
 
 		if (componentsToDraw.showChannelDial)
 		{
+			primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF);
+    		primary->FillRectangle(primary, screenWidth/2 - 110 , screenHeight/2 - 210, 220, 70);
+
+			primary->SetColor(primary, 0xFF, 0xFF, 0xFF, 0xFF);
+    		primary->FillRectangle(primary, screenWidth/2 - 100, screenHeight/2 - 200, 200, 50);
+
+			primary->SetColor(primary, 0x00, 0x00, 0x00, 0xEF);
+
+			if (numberOfKeys == 1)
+			{
+				sprintf(tempString, "%d", keysToShow[0]);
+				DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 15, screenHeight/2 - 160, DSTF_LEFT));
+			}
+			else if (numberOfKeys == 2)
+			{
+				sprintf(tempString, "%d%d", keysToShow[0], keysToShow[1]);
+				DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 25, screenHeight/2 - 160, DSTF_LEFT));
+			}
+			else if (numberOfKeys == 3)
+			{
+				sprintf(tempString, "%d%d%d", keysToShow[0], keysToShow[1], keysToShow[2]);
+				DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 35, screenHeight/2 - 160, DSTF_LEFT));
+			}
 		}
 
 		DFBCHECK(primary->Flip(primary, NULL, 0));
@@ -357,6 +378,15 @@ void setTimerParams()
 	memset(&infoTimerSpec, 0, sizeof(infoTimerSpec));
 	infoTimerSpec.it_value.tv_sec = 3;
 	infoTimerSpec.it_value.tv_nsec = 0;
+}
+
+void channelDial(int32_t keysPressed, int32_t keys[])
+{
+	componentsToDraw.showChannelDial = true;
+	numberOfKeys = keysPressed;
+	keysToShow[0] = keys[0];
+	keysToShow[1] = keys[1];
+	keysToShow[2] = keys[2];
 }
 
 void removeProgramNumber()

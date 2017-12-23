@@ -234,16 +234,19 @@ void inputChannelNumber(uint16_t key)
 	}
 	else if (keysPressed == 3)
 	{
-		keysPressed == 1;
+		printf("heeeeej\n");
+		keysPressed = 1;
 		keys[0] = key;
 		keys[1] = 0;
 		keys[2] = 0;
 	}
 
+	channelDial(keysPressed, keys);
+
 	printf("\nKeyOne: %d\n", keys[0]);
 	printf("KeyTwo: %d\n", keys[1]);
 	printf("KeyThree: %d\n", keys[2]);
-	printf("Keypressed: %d\n", keysPressed);
+	printf("\nKeypressed: %d\n", keysPressed);
 }
 
 void changeChannel()
@@ -262,6 +265,8 @@ void changeChannel()
 	{
 		channel = 100*keys[0] + 10*keys[1] + keys[2];
 	}
+
+	removeChannelDial();
 
 	changeChannelKey(--channel);
 

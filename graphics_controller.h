@@ -64,10 +64,12 @@ void drawVolumeBar(uint8_t volumeValue);
  */
 void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid);
 
-void channelDial();
+void channelDial(int32_t keysPressed, int32_t keys[]);
 
 void setRadioLogo();
 
 void removeRadioLogo();
+
+void removeChannelDial();
 
 #endif /* __GRAPHICS_CONTROLLER_H__ */

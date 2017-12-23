@@ -668,7 +668,8 @@ void changeChannelKey(int32_t channelNumber)
 {
 	if ((channelNumber > -1) && (channelNumber < patTable->serviceInfoCount))
 	{
-		startChannel(channelNumber);
+		programNumber = channelNumber;
+		changeChannel = true;
 	}
 }
 
