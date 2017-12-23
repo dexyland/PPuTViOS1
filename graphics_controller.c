@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <time.h>
+#include "pthread.h"
 
 
 static IDirectFBSurface* primary = NULL;
@@ -37,7 +38,7 @@ static int32_t timerFlags = 0;
 static void removeProgramNumber();
 static void removeVolumeBar();
 static void removeInfo();
-static void renderThread();
+static void* renderThread();
 static void setTimerParams();
 static void wipeScreen();
 
@@ -165,10 +166,9 @@ GraphicsControllerError graphicsControllerDeinit()
 	return GC_NO_ERROR;
 }
 
-void renderThread()
+void* renderThread()
 {
 	char tempString[10];
-	renderThreadFinished = false;
 
 	while (!stopDrawing)
 	{
@@ -235,7 +235,7 @@ void renderThread()
 			DFBCHECK(primary->Blit(primary, logoSurface, NULL, screenWidth - logoWidth - 100, 50));
 		}
 
-		if (showRadioLogo == true)
+		if (componentsToDraw.showRadioLogo == true)
 		{
 			primary->SetColor(primary, 0x66, 0x00, 0x00, 0xFF);
     		primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
@@ -244,7 +244,7 @@ void renderThread()
 
 			sprintf(tempString, "RADIO");
 
-			DFBCHECK(primary->DrawString(primary, tempString, -1, xLogo, yLogo, DSTF_LEFT));
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2, screenHeight/2, DSTF_LEFT));
 		}
 
 		if (componentsToDraw.showInfo)
