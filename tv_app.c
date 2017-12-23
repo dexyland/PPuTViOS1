@@ -30,6 +30,7 @@ void printCurrentTime();
 static void registerCurrentTime(TimeStructure* timeStructure);
 static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value);
 static void registerCurrentVolume(uint8_t volumeValue);
+static void registerProgramType(int16_t type);
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
@@ -81,6 +82,9 @@ int main(int argc, char *argv[])
 
 	/* register volume callback */
 	ERRORCHECK(registerVolumeCallback(registerCurrentVolume));
+
+	/* register program type callback */
+	ERRORCHECK(registerProgramTypeCallback(registerProgramType));
 
     /* initialize stream controller module */
     ERRORCHECK(streamControllerInit());
@@ -323,4 +327,16 @@ void printCurrentTime()
 void registerCurrentVolume(uint8_t volumeValue)
 {
 	currentVolume = volumeValue;
+}
+
+void registerProgramType(int16_t type)
+{
+	if (type == -1)
+	{
+		setRadioLogo();
+	}
+	else
+	{
+		removeRadioLogo();
+	}
 }

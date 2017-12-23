@@ -45,6 +45,14 @@ static uint8_t hoursToDraw = 0;
 static uint8_t minutesToDraw = 0;
 static int16_t audioPidToDraw = 0;
 static int16_t videoPidToDraw = 0;
+			
+static IDirectFBImageProvider *provider;
+static IDirectFBSurface *logoSurface = NULL;
+static int32_t logoHeight;
+static int32_t logoWidth;
+
+static pthread_cond_t graphicsCond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t graphicsMutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* helper macro for error checking */
 #define DFBCHECK(x...)                                      \
@@ -73,6 +81,7 @@ GraphicsControllerError graphicsControllerInit()
 	componentsToDraw.showVolume = false;
 	componentsToDraw.showInfo = false;
 	componentsToDraw.showChannelDial = false;
+	componentsToDraw.showRadioLogo = false;
 	componentsToDraw.programNumber = 0;
 	componentsToDraw.volume = 0;
 
@@ -129,6 +138,15 @@ GraphicsControllerError graphicsControllerDeinit()
 {
 	stopDrawing = 1;
 
+	/* wait for render thread to finish */
+    pthread_mutex_lock(&graphicsMutex);
+	if (ETIMEDOUT == pthread_cond_wait(&graphicsCond, &graphicsMutex))
+	{
+		printf("\n%s : ERROR Lock timeout exceeded!\n", __FUNCTION__);
+        streamControllerDeinit();
+	}	
+	pthread_mutex_unlock(&graphicsMutex);
+
 	if (pthread_join(gcThread, NULL))
     {
         printf("\n%s : ERROR pthread_join fail!\n", __FUNCTION__);
@@ -149,6 +167,9 @@ GraphicsControllerError graphicsControllerDeinit()
 
 void renderThread()
 {
+	char tempString[10];
+	renderThreadFinished = false;
+
 	while (!stopDrawing)
 	{
 		wipeScreen();
@@ -161,11 +182,6 @@ void renderThread()
 
 		if (componentsToDraw.showVolume)
 		{
-			/* draw image from file */
-			IDirectFBImageProvider *provider;
-			IDirectFBSurface *logoSurface = NULL;
-			int32_t logoHeight, logoWidth;
-
     		/* create the image provider for the specified file */
 			switch (componentsToDraw.volume)
 			{
@@ -219,14 +235,24 @@ void renderThread()
 			DFBCHECK(primary->Blit(primary, logoSurface, NULL, screenWidth - logoWidth - 100, 50));
 		}
 
+		if (showRadioLogo == true)
+		{
+			primary->SetColor(primary, 0x66, 0x00, 0x00, 0xFF);
+    		primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
+
+			primary->SetColor(primary, 0xFF, 0xFF, 0x00, 0xEF);
+
+			sprintf(tempString, "RADIO");
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, xLogo, yLogo, DSTF_LEFT));
+		}
+
 		if (componentsToDraw.showInfo)
 		{
 			primary->SetColor(primary, 0x00, 0x66, 0x99, 0xEF);
     		primary->FillRectangle(primary, screenWidth/10 - 20, 3*screenHeight/4 - 20, 8*screenWidth/10 + 40, screenHeight/5 + 40);
 			primary->SetColor(primary, 0xB3, 0xE6, 0xFF, 0xEF);
     		primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 8*screenWidth/10, screenHeight/5);
-
-			char tempString[10];
 
 			DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF));
 
@@ -253,13 +279,17 @@ void renderThread()
 		if (componentsToDraw.showChannelDial)
 		{
 		}
+
 		DFBCHECK(primary->Flip(primary, NULL, 0));
 	}
+
+	pthread_mutex_lock(&graphicsMutex);
+	pthread_cond_signal(&graphicsCond);
+	pthread_mutex_unlock(&graphicsMutex);
 }
 
 void wipeScreen()
 {
-    /* clear screen */
     DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00));
     DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
 }
@@ -347,4 +377,14 @@ void removeInfo()
 void removeChannelDial()
 {
 	componentsToDraw.showChannelDial = false;
+}
+
+void setRadioLogo()
+{
+	componentsToDraw.showRadioLogo = true;
+}
+
+void removeRadioLogo()
+{
+	componentsToDraw.showRadioLogo = false;
 }

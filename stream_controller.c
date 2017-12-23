@@ -24,6 +24,7 @@ static bool timeTablesRecieved = false;
 
 static TimeCallback timeRecievedCallback = NULL;
 static VolumeCallback volumeReportCallback = NULL;
+static ProgramTypeCallback programType = NULL;
 
 static struct timespec lockStatusWaitTime;
 static struct timeval now;
@@ -229,6 +230,8 @@ void startChannel(int32_t channelNumber)
     currentChannel.programNumber = channelNumber + 1;
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
+
+	programType(videoPid);
 
 	if (timeTablesRecieved == false)
 	{
@@ -695,6 +698,21 @@ StreamControllerError registerVolumeCallback(VolumeCallback volumeCallback)
 	{
 		printf("Volume callback function registered!\n");
 		volumeReportCallback = volumeCallback;
+		return SC_NO_ERROR;
+	}
+}
+
+StreamControllerError registerProgramTypeCallback(ProgramTypeCallback programTypeCallback)
+{
+	if (programTypeCallback == NULL)
+	{
+		printf("Error registring volume callback!\n");
+		return SC_ERROR;
+	}
+	else
+	{
+		printf("Volume callback function registered!\n");
+		programType = programTypeCallback;
 		return SC_NO_ERROR;
 	}
 }

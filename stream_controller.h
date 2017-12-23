@@ -84,6 +84,19 @@ typedef void(*VolumeCallback)(uint8_t currentVolume);
 StreamControllerError registerVolumeCallback(VolumeCallback volumeCallback);
 
 /**
+ *
+ */
+typedef void(*ProgramTypeCallback)(int16_t type);
+
+/*
+ * @brief Registers volume callback
+ *
+ * @param  [in]  volumeCallback - pointer to volume callback function
+ * @return Stream controller error code
+ */
+StreamControllerError registerProgramTypeCallback(ProgramTypeCallback programTypeCallback);
+
+/**
  * @brief Initializes stream controller module
  *
  * @return stream controller error code
