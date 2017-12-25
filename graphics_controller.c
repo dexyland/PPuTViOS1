@@ -156,11 +156,9 @@ void* renderThread()
             primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
 
             primary->SetColor(primary, 0xFF, 0xFF, 0x00, 0xEF);
-
             sprintf(tempString, "RADIO");
-
             DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 50, screenHeight/2, DSTF_LEFT));
-		}
+        }
 
         if (componentsToDraw.showVolume)
         {
@@ -200,7 +198,6 @@ void* renderThread()
                     DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_10.png", &provider));
                     break;
             }
-
             DFBCHECK(provider->GetSurfaceDescription(provider, &surfaceDesc));
             DFBCHECK(dfbInterface->CreateSurface(dfbInterface, &surfaceDesc, &logoSurface));
             DFBCHECK(provider->RenderTo(provider, logoSurface, NULL));
@@ -219,17 +216,13 @@ void* renderThread()
             primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 8*screenWidth/10, screenHeight/5);
 
             DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF));
-
             sprintf(tempString, "Program number : %d", componentsToDraw.programNumber);
-
             DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 40, DSTF_LEFT));
 
             sprintf(tempString, "Video PID : %d", componentsToDraw.videoPidToDraw);
-
             DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 80, DSTF_LEFT));
 
             sprintf(tempString, "Audio PID : %d", componentsToDraw.audioPidToDraw);
-
             DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 120, DSTF_LEFT));
 
             if (componentsToDraw.hoursToDraw == 30)
@@ -253,7 +246,6 @@ void* renderThread()
             }
 
             sprintf(tempString, "teletext");
-
             DFBCHECK(primary->DrawString(primary, tempString, -1, 7*screenWidth/9 + 40, 3*screenHeight/4 + 40, DSTF_LEFT));
         }
 
@@ -283,10 +275,8 @@ void* renderThread()
                 DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 35, screenHeight/2 - 160, DSTF_LEFT));
             }
         }
-
         DFBCHECK(primary->Flip(primary, NULL, 0));
     }
-
     pthread_mutex_lock(&graphicsMutex);
     pthread_cond_signal(&graphicsCond);
     pthread_mutex_unlock(&graphicsMutex);
@@ -308,8 +298,6 @@ void drawVolumeBar(uint8_t volumeValue)
 
 void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, uint8_t programNumber, int8_t teletext)
 {
-    timer_settime(infoTimer, timerFlags, &infoTimerSpec, &infoTimerSpecOld);
-
     componentsToDraw.audioPidToDraw = audioPid;
     componentsToDraw.videoPidToDraw = videoPid;
     componentsToDraw.hoursToDraw = hours;
@@ -317,6 +305,7 @@ void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t vide
     componentsToDraw.programNumber = programNumber;
     componentsToDraw.teletext = teletext;
 
+    timer_settime(infoTimer, timerFlags, &infoTimerSpec, &infoTimerSpecOld);
     componentsToDraw.showInfo = true;
 }
 
@@ -351,12 +340,13 @@ void channelDial(uint8_t keysPressed, uint8_t keys[])
     keysToShow[0] = keys[0];
     keysToShow[1] = keys[1];
     keysToShow[2] = keys[2];
+
     componentsToDraw.showChannelDial = true;
 }
 
-void removeVolumeBar()
+void removeChannelDial()
 {
-    componentsToDraw.showVolume = false;
+    componentsToDraw.showChannelDial = false;
 }
 
 void removeInfo()
@@ -364,9 +354,9 @@ void removeInfo()
     componentsToDraw.showInfo = false;
 }
 
-void removeChannelDial()
+void removeVolumeBar()
 {
-    componentsToDraw.showChannelDial = false;
+    componentsToDraw.showVolume = false;
 }
 
 void setRadioLogo()
