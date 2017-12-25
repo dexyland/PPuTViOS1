@@ -301,8 +301,8 @@ ParseErrorCode printPmtTable(PmtTable* pmtTable)
 
 ParseErrorCode parseTdtTable(const uint8_t* tdtSectionBuffer, TdtTable* tdtTable)
 {
-	uint8_t lower8Bits = 0;
-	uint8_t higher8Bits = 0;
+    uint8_t lower8Bits = 0;
+    uint8_t higher8Bits = 0;
     uint16_t all16Bits = 0;
 
     if (tdtSectionBuffer == NULL || tdtTable == NULL)
@@ -311,56 +311,56 @@ ParseErrorCode parseTdtTable(const uint8_t* tdtSectionBuffer, TdtTable* tdtTable
         return TABLES_PARSE_ERROR;
     }
 
-	tdtTable->tableId = (uint8_t)* tdtSectionBuffer;
+    tdtTable->tableId = (uint8_t)* tdtSectionBuffer;
 
-	higher8Bits = (uint8_t) *(tdtSectionBuffer + 1);
-	lower8Bits = (uint8_t) *(tdtSectionBuffer + 2);
-	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
-	tdtTable->sectionLength = all16Bits & 0x0FFF;
+    higher8Bits = (uint8_t) *(tdtSectionBuffer + 1);
+    lower8Bits = (uint8_t) *(tdtSectionBuffer + 2);
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    tdtTable->sectionLength = all16Bits & 0x0FFF;
 
-	higher8Bits = (uint8_t) *(tdtSectionBuffer + 3);
-	lower8Bits = (uint8_t) *(tdtSectionBuffer + 4);
-	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
-	tdtTable->MJD = all16Bits;
+    higher8Bits = (uint8_t) *(tdtSectionBuffer + 3);
+    lower8Bits = (uint8_t) *(tdtSectionBuffer + 4);
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    tdtTable->MJD = all16Bits;
 
-	lower8Bits = (uint8_t) *(tdtSectionBuffer + 5);
-	tdtTable->hours = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+    lower8Bits = (uint8_t) *(tdtSectionBuffer + 5);
+    tdtTable->hours = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
-	lower8Bits = (uint8_t) *(tdtSectionBuffer + 6);
-	tdtTable->minutes = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+    lower8Bits = (uint8_t) *(tdtSectionBuffer + 6);
+    tdtTable->minutes = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
-	lower8Bits = (uint8_t) *(tdtSectionBuffer + 7);
-	tdtTable->seconds = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+    lower8Bits = (uint8_t) *(tdtSectionBuffer + 7);
+    tdtTable->seconds = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
-	return TABLES_PARSE_OK;
+    return TABLES_PARSE_OK;
 }
 
 ParseErrorCode printTdtTable(TdtTable* tdtTable)
 {
-	if (tdtTable == NULL)
-	{
-		printf("\n%s : ERROR received parameter is not ok\n", __FUNCTION__);
-		return TABLES_PARSE_ERROR;
-	}
+    if (tdtTable == NULL)
+    {
+        printf("\n%s : ERROR received parameter is not ok\n", __FUNCTION__);
+        return TABLES_PARSE_ERROR;
+    }
 
     printf("\n********************TDT TABLE SECTION********************\n");
     printf("table_id                 |      %d\n",tdtTable->tableId);
     printf("section_length           |      %d\n",tdtTable->sectionLength);
-	printf("current time (UTC time)  |      %.2d:%.2d:%.2d\n", tdtTable->hours, tdtTable->minutes, tdtTable->seconds);
-	printf("MJD code                 |      %d\n", tdtTable->MJD);
+    printf("current time (UTC time)  |      %.2d:%.2d:%.2d\n", tdtTable->hours, tdtTable->minutes, tdtTable->seconds);
+    printf("MJD code                 |      %d\n", tdtTable->MJD);
     printf("\n********************TDT TABLE SECTION********************\n");
 
-	return TABLES_PARSE_OK;
+    return TABLES_PARSE_OK;
 }
 
 ParseErrorCode parseTotTable(const uint8_t* totSectionBuffer, TotTable* totTable)
 {
-	uint8_t lower8Bits = 0;
-	uint8_t higher8Bits = 0;
+    uint8_t lower8Bits = 0;
+    uint8_t higher8Bits = 0;
     uint16_t all16Bits = 0;
-	uint16_t descriptorLoopLength = 0;
-	uint8_t infoLoopLength = 0;
-	totTable->descriptorsCount = 0;
+    uint16_t descriptorLoopLength = 0;
+    uint8_t infoLoopLength = 0;
+    totTable->descriptorsCount = 0;
 
     if (totSectionBuffer == NULL || totTable == NULL)
     {
@@ -368,104 +368,104 @@ ParseErrorCode parseTotTable(const uint8_t* totSectionBuffer, TotTable* totTable
         return TABLES_PARSE_ERROR;
     }
 
-	totTable->tableId = (uint8_t)* totSectionBuffer;
+    totTable->tableId = (uint8_t)* totSectionBuffer;
 
-	higher8Bits = (uint8_t) *(totSectionBuffer + 1);
-	lower8Bits = (uint8_t) *(totSectionBuffer + 2);
-	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
-	totTable->sectionLength = all16Bits & 0x0FFF;
+    higher8Bits = (uint8_t) *(totSectionBuffer + 1);
+    lower8Bits = (uint8_t) *(totSectionBuffer + 2);
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    totTable->sectionLength = all16Bits & 0x0FFF;
 
-	higher8Bits = (uint8_t) *(totSectionBuffer + 3);
-	lower8Bits = (uint8_t) *(totSectionBuffer + 4);
-	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
-	totTable->MJD = all16Bits;
+    higher8Bits = (uint8_t) *(totSectionBuffer + 3);
+    lower8Bits = (uint8_t) *(totSectionBuffer + 4);
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    totTable->MJD = all16Bits;
 
-	lower8Bits = (uint8_t) *(totSectionBuffer + 5);
-	totTable->hours = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+    lower8Bits = (uint8_t) *(totSectionBuffer + 5);
+    totTable->hours = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
-	lower8Bits = (uint8_t) *(totSectionBuffer + 6);
-	totTable->minutes = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+    lower8Bits = (uint8_t) *(totSectionBuffer + 6);
+    totTable->minutes = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
-	lower8Bits = (uint8_t) *(totSectionBuffer + 7);
-	totTable->seconds = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
+    lower8Bits = (uint8_t) *(totSectionBuffer + 7);
+    totTable->seconds = 10*(lower8Bits >> 4) + (lower8Bits & 0x0F);
 
-	higher8Bits = (uint8_t) *(totSectionBuffer + 8);
-	lower8Bits = (uint8_t) *(totSectionBuffer + 9);
-	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
-	totTable->descriptorsLoopLength = all16Bits & 0x0FFF;
-	descriptorLoopLength = all16Bits & 0x0FFF;
+    higher8Bits = (uint8_t) *(totSectionBuffer + 8);
+    lower8Bits = (uint8_t) *(totSectionBuffer + 9);
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    totTable->descriptorsLoopLength = all16Bits & 0x0FFF;
+    descriptorLoopLength = all16Bits & 0x0FFF;
 
-	while (descriptorLoopLength > 4)
-	{
-		uint8_t i = 0;
-		uint8_t currentDesc = totTable->descriptorsCount;
-		uint8_t currentTag = (uint8_t) *(totSectionBuffer + 10 + 15*currentDesc);
+    while (descriptorLoopLength > 4)
+    {
+        uint8_t i = 0;
+        uint8_t currentDesc = totTable->descriptorsCount;
+        uint8_t currentTag = (uint8_t) *(totSectionBuffer + 10 + 15*currentDesc);
 
-		if (currentTag == 0x58)
-		{
-			totTable->descriptors[currentDesc].descriptorTag = currentTag;
-			totTable->descriptors[currentDesc].descriptorLength = (uint8_t) *(totSectionBuffer + 11 + 15*currentDesc);
-			totTable->descriptors[currentDesc].numberOfInfos = (uint8_t) (*(totSectionBuffer + 11 + 15*currentDesc)/13);
+        if (currentTag == 0x58)
+        {
+            totTable->descriptors[currentDesc].descriptorTag = currentTag;
+            totTable->descriptors[currentDesc].descriptorLength = (uint8_t) *(totSectionBuffer + 11 + 15*currentDesc);
+            totTable->descriptors[currentDesc].numberOfInfos = (uint8_t) (*(totSectionBuffer + 11 + 15*currentDesc)/13);
 
-			for (i = 0; i < totTable->descriptors[currentDesc].numberOfInfos; i++)
-			{
-				totTable->descriptors[currentDesc].ltoInfo[i].countryCH1 = (uint8_t) *(totSectionBuffer + 12 + i*13);
-				totTable->descriptors[currentDesc].ltoInfo[i].countryCH2 = (uint8_t) *(totSectionBuffer + 13 + i*13);
-				totTable->descriptors[currentDesc].ltoInfo[i].countryCH3 = (uint8_t) *(totSectionBuffer + 14 + i*13);
+            for (i = 0; i < totTable->descriptors[currentDesc].numberOfInfos; i++)
+            {
+                totTable->descriptors[currentDesc].ltoInfo[i].countryCH1 = (uint8_t) *(totSectionBuffer + 12 + i*13);
+                totTable->descriptors[currentDesc].ltoInfo[i].countryCH2 = (uint8_t) *(totSectionBuffer + 13 + i*13);
+                totTable->descriptors[currentDesc].ltoInfo[i].countryCH3 = (uint8_t) *(totSectionBuffer + 14 + i*13);
 
-				lower8Bits = (uint8_t) *(totSectionBuffer + 15 + i*13);
-				totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffsetPolarity = lower8Bits & 0x01;
-				totTable->descriptors[currentDesc].ltoInfo[i].countryRegionId = lower8Bits >> 2;
-			
-				higher8Bits = (uint8_t) *(totSectionBuffer + 16 + i*13);
-				lower8Bits = (uint8_t) *(totSectionBuffer + 17 + i*13);
-				totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffsetHours = (higher8Bits & 0x0F) + 10*((higher8Bits & 0xF0) >> 4);
-				totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffsetMinutes = (lower8Bits & 0x0F) + 10*((lower8Bits & 0xF0) >> 4);
-			}
-		}
-		totTable->descriptorsCount++;
-		descriptorLoopLength -= (totTable->descriptors[currentDesc].descriptorLength + 2);
-	}
+                lower8Bits = (uint8_t) *(totSectionBuffer + 15 + i*13);
+                totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffsetPolarity = lower8Bits & 0x01;
+                totTable->descriptors[currentDesc].ltoInfo[i].countryRegionId = lower8Bits >> 2;
+            
+                higher8Bits = (uint8_t) *(totSectionBuffer + 16 + i*13);
+                lower8Bits = (uint8_t) *(totSectionBuffer + 17 + i*13);
+                totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffsetHours = (higher8Bits & 0x0F) + 10*((higher8Bits & 0xF0) >> 4);
+                totTable->descriptors[currentDesc].ltoInfo[i].localTimeOffsetMinutes = (lower8Bits & 0x0F) + 10*((lower8Bits & 0xF0) >> 4);
+            }
+        }
+        totTable->descriptorsCount++;
+        descriptorLoopLength -= (totTable->descriptors[currentDesc].descriptorLength + 2);
+    }
 
-	return TABLES_PARSE_OK;	
+    return TABLES_PARSE_OK;    
 }
 
 ParseErrorCode printTotTable(TotTable* totTable)
 {
-	uint8_t i = 0;
-	uint8_t j = 0;
+    uint8_t i = 0;
+    uint8_t j = 0;
 
-	if (totTable == NULL)
-	{
-		printf("\n%s : ERROR received parameter is not ok\n", __FUNCTION__);
-		return TABLES_PARSE_ERROR;
-	}
+    if (totTable == NULL)
+    {
+        printf("\n%s : ERROR received parameter is not ok\n", __FUNCTION__);
+        return TABLES_PARSE_ERROR;
+    }
 
     printf("\n********************TOT TABLE SECTION********************\n");
     printf("table_id                 |      %.2x\n",totTable->tableId);
     printf("section_length           |      %d\n",totTable->sectionLength);
-	printf("current time (UTC time)  |      %.2d:%.2d:%.2d\n", totTable->hours, totTable->minutes, totTable->seconds);
-	printf("MJD code                 |      %d\n", totTable->MJD);
+    printf("current time (UTC time)  |      %.2d:%.2d:%.2d\n", totTable->hours, totTable->minutes, totTable->seconds);
+    printf("MJD code                 |      %d\n", totTable->MJD);
 
-	for (i = 0; i < totTable->descriptorsCount; i++)
-	{
-		printf("\n%d. descriptor:\n", i+1);
-		printf("descriptor tag           |        %.2x\n", totTable->descriptors[i].descriptorTag);
-		printf("descriptor length        |        %d\n", totTable->descriptors[i].descriptorLength);
+    for (i = 0; i < totTable->descriptorsCount; i++)
+    {
+        printf("\n%d. descriptor:\n", i+1);
+        printf("descriptor tag           |        %.2x\n", totTable->descriptors[i].descriptorTag);
+        printf("descriptor length        |        %d\n", totTable->descriptors[i].descriptorLength);
 
-		for (j = 0; j < totTable->descriptors[i].numberOfInfos; j++)
-		{
-			printf("###########################################\n");
-			printf("%d. LTO info                              \n", j+1);
-			printf("counrty code              |        %.1x%.1x%.1x\n", totTable->descriptors[i].ltoInfo[j].countryCH1, totTable->descriptors[i].ltoInfo[j].countryCH2, totTable->descriptors[i].ltoInfo[j].countryCH3);
-			printf("counrty region id         |        %d\n", totTable->descriptors[i].ltoInfo[j].countryRegionId);
-			printf("localTimeOffsetPolarity   |        %d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetPolarity);
-			printf("local time offset         |        %.2d:%.2d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetHours, totTable->descriptors[i].ltoInfo[j].localTimeOffsetMinutes);
-			printf("###########################################\n");
-		}
-	}
+        for (j = 0; j < totTable->descriptors[i].numberOfInfos; j++)
+        {
+            printf("###########################################\n");
+            printf("%d. LTO info                              \n", j+1);
+            printf("counrty code              |        %.1x%.1x%.1x\n", totTable->descriptors[i].ltoInfo[j].countryCH1, totTable->descriptors[i].ltoInfo[j].countryCH2, totTable->descriptors[i].ltoInfo[j].countryCH3);
+            printf("counrty region id         |        %d\n", totTable->descriptors[i].ltoInfo[j].countryRegionId);
+            printf("localTimeOffsetPolarity   |        %d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetPolarity);
+            printf("local time offset         |        %.2d:%.2d\n", totTable->descriptors[i].ltoInfo[j].localTimeOffsetHours, totTable->descriptors[i].ltoInfo[j].localTimeOffsetMinutes);
+            printf("###########################################\n");
+        }
+    }
 
     printf("\n********************TOT TABLE SECTION********************\n");
 
-	return TABLES_PARSE_OK;
+    return TABLES_PARSE_OK;
 }

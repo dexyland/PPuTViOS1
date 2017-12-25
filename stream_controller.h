@@ -11,9 +11,6 @@
 #include <errno.h>
 #include <stdbool.h>
 
-#define DESIRED_FREQUENCY 754000000	        /* Tune frequency in Hz */
-#define BANDWIDTH 8    				        /* Bandwidth in Mhz */
-#define LINE_LENGTH 100						/* Max line length in config file */
 
 /**
  * @brief Structure that defines stream controller error
@@ -33,7 +30,7 @@ typedef struct _ChannelInfo
     int16_t programNumber;
     int16_t audioPid;
     int16_t videoPid;
-	int8_t teletext;
+    int8_t teletext;
 }ChannelInfo;
 
 /**
@@ -41,10 +38,10 @@ typedef struct _ChannelInfo
  */
 typedef struct _InitialInfo
 {
-	uint32_t tuneFrequency;
-	uint32_t tuneBandwidth;
-	uint32_t programNumber;
-	t_Module tuneModule;
+    uint32_t tuneFrequency;
+    uint32_t tuneBandwidth;
+    uint32_t programNumber;
+    t_Module tuneModule;
 }InitialInfo;
 
 /**
@@ -52,10 +49,10 @@ typedef struct _InitialInfo
  */
 typedef struct _TimeStructure
 {
-	uint8_t hours;
-	uint8_t minutes;
-	uint8_t seconds;
-	time_t timeStampSeconds;
+    uint8_t hours;
+    uint8_t minutes;
+    uint8_t seconds;
+    time_t timeStampSeconds;
 }TimeStructure;
 
 /**
@@ -71,6 +68,13 @@ typedef void(*TimeCallback)(TimeStructure* timeStructure);
  */
 StreamControllerError registerTimeCallback(TimeCallback timeCallback);
 
+/*
+ * @brief Unregisters time callback
+ *
+ * @return Stream controller error code
+ */
+StreamControllerError unregisterTimeCallback();
+
 /**
  * @brief Volume value callback
  */
@@ -84,18 +88,32 @@ typedef void(*VolumeCallback)(uint8_t currentVolume);
  */
 StreamControllerError registerVolumeCallback(VolumeCallback volumeCallback);
 
-/**
+/*
+ * @brief Unregisters volume callback
  *
+ * @return Stream controller error code
+ */
+StreamControllerError unregisterVolumeCallback();
+
+/**
+ * @brief Program type callback
  */
 typedef void(*ProgramTypeCallback)(int16_t type);
 
 /*
- * @brief Registers volume callback
+ * @brief Registers program type callback
  *
  * @param  [in]  volumeCallback - pointer to volume callback function
  * @return Stream controller error code
  */
 StreamControllerError registerProgramTypeCallback(ProgramTypeCallback programTypeCallback);
+
+/*
+ * @brief Unregisters program type callback
+ *
+ * @return Stream controller error code
+ */
+StreamControllerError unregisterProgramTypeCallback();
 
 /**
  * @brief Initializes stream controller module
@@ -134,7 +152,7 @@ StreamControllerError channelDown();
 StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 
 /**
- * @brief Loads config.ini file holding initial info
+ * @brief Loads config.ini file holding initial configuration
  *
  * @param [in] fileName - name of file to be loaded
  * @return stream conotroller error code
@@ -144,21 +162,21 @@ StreamControllerError loadInitialInfo(char fileName[]);
 /**
  * @brief changes current program to channelNumber
  */
-void changeChannelKey(int32_t channelNumber);
+StreamControllerError changeChannelKey(int32_t channelNumber);
 
 /**
  * @brief Increases current volume value
  */
-void volumeUp();
+StreamControllerError volumeUp();
 
 /**
  * @brief Decreases current volume value
  */
-void volumeDown();
+StreamControllerError volumeDown();
 
 /**
  * @brief Sets current volume value to zero
  */
-void volumeMute();
+StreamControllerError volumeMute();
 
 #endif /* __STREAM_CONTROLLER_H__ */

@@ -33,24 +33,24 @@ RemoteControllerError remoteControllerDeinit()
 
 RemoteControllerError registerRemoteControllerCallback(RemoteControllerCallback remoteControllerCallback)
 {
-	if (remoteControllerCallback == NULL)
-	{
-		printf("Error registring callback!\n");
-		return RC_ERROR;
-	}
-	else
-	{
-		printf("Remote callback function registered!\n");
-		callback = remoteControllerCallback;
-		return RC_NO_ERROR;
-	}
+    if (remoteControllerCallback == NULL)
+    {
+        printf("Error registring callback!\n");
+        return RC_ERROR;
+    }
+    else
+    {
+        printf("Remote callback function registered!\n");
+        callback = remoteControllerCallback;
+        return RC_NO_ERROR;
+    }
 }
 
-RemoteControllerError unregisterRemoteControllerCallback(RemoteControllerCallback remoteControllerCallback)
+RemoteControllerError unregisterRemoteControllerCallback()
 {
-	callback = NULL;
+    callback = NULL;
 
-	return RC_NO_ERROR;
+    return RC_NO_ERROR;
 }
 
 void* inputEventTask()
@@ -64,12 +64,12 @@ void* inputEventTask()
     if(inputFileDesc == -1)
     {
         printf("Error while opening device (%s) !", strerror(errno));
-		return (void*)RC_ERROR;
+        return (void*)RC_ERROR;
     }
     
     /* get the name of input device */
     ioctl(inputFileDesc, EVIOCGNAME(sizeof(deviceName)), deviceName);
-	printf("RC device opened succesfully [%s]\n", deviceName);
+    printf("RC device opened succesfully [%s]\n", deviceName);
         
     while(!threadExit)
     {
@@ -77,26 +77,25 @@ void* inputEventTask()
         /* read next input event */
         if(getKey((uint8_t*)&eventBuf))
         {
-			printf("Error while reading input events !");
-			return (void*)RC_ERROR;
-		}
+            printf("Error while reading input events !");
+            return (void*)RC_ERROR;
+        }
 
-		
-		/* filter input events */
+        
+        /* filter input events */
         if(eventBuf.type == EV_KEY && 
           (eventBuf.value == EV_VALUE_KEYPRESS || eventBuf.value == EV_VALUE_AUTOREPEAT))
         {
-			printf("Event time: %d sec, %d usec\n",(int)eventBuf.time.tv_sec,(int)eventBuf.time.tv_usec);
-			printf("Event type: %hu\n",eventBuf.type);
-			printf("Event code: %hu\n",eventBuf.code);
-			printf("Event value: %d\n",eventBuf.value);
-			printf("\n");
+            printf("Event time: %d sec, %d usec\n",(int)eventBuf.time.tv_sec,(int)eventBuf.time.tv_usec);
+            printf("Event type: %hu\n",eventBuf.type);
+            printf("Event code: %hu\n",eventBuf.code);
+            printf("Event value: %d\n",eventBuf.value);
+            printf("\n");
             
-            callback(eventBuf.code, eventBuf.type, eventBuf.value);
-           
-		}
+            callback(eventBuf.code, eventBuf.type, eventBuf.value);  
+        }
     }
-	return (void*)RC_NO_ERROR;
+    return (void*)RC_NO_ERROR;
 }
 
 int32_t getKey(uint8_t* buf)

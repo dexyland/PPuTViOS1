@@ -73,10 +73,8 @@ RemoteControllerError registerRemoteControllerCallback(RemoteControllerCallback 
 /*
  * @brief Unregisters remote controller callback
  *
- * @param  [in] remoteControllerCallback - pointer to remote controller callback function
  * @return remote controller error code
  */
-RemoteControllerError unregisterRemoteControllerCallback(RemoteControllerCallback remoteControllerCallback);
+RemoteControllerError unregisterRemoteControllerCallback();
 
 #endif /* __REMOTE_CONTROLLER_H__ */
-

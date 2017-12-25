@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define TABLES_MAX_NUMBER_OF_PIDS_IN_PAT    20 	    /* Max number of PMT pids in one PAT table */
+#define TABLES_MAX_NUMBER_OF_PIDS_IN_PAT    20         /* Max number of PMT pids in one PAT table */
 #define TABLES_MAX_NUMBER_OF_ELEMENTARY_PID 20      /* Max number of elementary pids in one PMT table */
 #define TABLES_MAX_NUMBER_OF_LTO_DESCRIPTORS 20     /* Max number of elementary info in local time offset descriptor */
 #define TABLES_MAX_NUMBER_OF_TOT_DESCRIPTORS 20     /* Max number of descriptors in tot table */
@@ -16,7 +16,7 @@
 typedef enum _ParseErrorCode
 {
     TABLES_PARSE_ERROR = 0,                         /* TABLES_PARSE_ERROR */
-	TABLES_PARSE_OK = 1                             /* TABLES_PARSE_OK */
+    TABLES_PARSE_OK = 1                             /* TABLES_PARSE_OK */
 }ParseErrorCode;
 
 /**
@@ -95,13 +95,13 @@ typedef struct _PmtTable
  */
 typedef struct _TdtTable
 {
-	uint8_t tableId;
-	uint8_t sectionSyntaxIndicator;
-	uint16_t sectionLength;
-	uint16_t MJD;
-	uint8_t hours;
-	uint8_t minutes;
-	uint8_t seconds;
+    uint8_t tableId;
+    uint8_t sectionSyntaxIndicator;
+    uint16_t sectionLength;
+    uint16_t MJD;
+    uint8_t hours;
+    uint8_t minutes;
+    uint8_t seconds;
 }TdtTable;
 
 /**
@@ -109,13 +109,13 @@ typedef struct _TdtTable
  */ 
 typedef struct _LTODescriptorInfo
 {
-	uint8_t countryCH1;
-	uint8_t countryCH2;
-	uint8_t countryCH3;
-	uint8_t countryRegionId;
-	uint8_t localTimeOffsetPolarity;
-	uint8_t localTimeOffsetHours;
-	uint8_t localTimeOffsetMinutes;
+    uint8_t countryCH1;
+    uint8_t countryCH2;
+    uint8_t countryCH3;
+    uint8_t countryRegionId;
+    uint8_t localTimeOffsetPolarity;
+    uint8_t localTimeOffsetHours;
+    uint8_t localTimeOffsetMinutes;
 }LTODescriptorInfo;
 
 /**
@@ -123,10 +123,10 @@ typedef struct _LTODescriptorInfo
  */
 typedef struct _LocalTimeOffsetDescriptor
 {
-	uint8_t descriptorTag;
-	uint8_t descriptorLength;
-	LTODescriptorInfo ltoInfo[TABLES_MAX_NUMBER_OF_LTO_DESCRIPTORS];
-	uint8_t numberOfInfos;
+    uint8_t descriptorTag;
+    uint8_t descriptorLength;
+    LTODescriptorInfo ltoInfo[TABLES_MAX_NUMBER_OF_LTO_DESCRIPTORS];
+    uint8_t numberOfInfos;
 }LocalTimeOffsetDescriptor;
 
 /**
@@ -134,18 +134,18 @@ typedef struct _LocalTimeOffsetDescriptor
  */
  typedef struct _TotTable
  {
-	uint8_t tableId;
-	uint8_t sectionSyntaxIndicator;
-	uint16_t sectionLength;
-	uint16_t MJD;
-	uint8_t hours;
-	uint8_t minutes;
-	uint8_t seconds;
-	uint16_t descriptorsLoopLength;
-	LocalTimeOffsetDescriptor descriptors[TABLES_MAX_NUMBER_OF_TOT_DESCRIPTORS];
-	uint8_t descriptorsCount;
+    uint8_t tableId;
+    uint8_t sectionSyntaxIndicator;
+    uint16_t sectionLength;
+    uint16_t MJD;
+    uint8_t hours;
+    uint8_t minutes;
+    uint8_t seconds;
+    uint16_t descriptorsLoopLength;
+    LocalTimeOffsetDescriptor descriptors[TABLES_MAX_NUMBER_OF_TOT_DESCRIPTORS];
+    uint8_t descriptorsCount;
  }TotTable;
-	
+    
 /**
  * @brief  Parse PAT header.
  * 
