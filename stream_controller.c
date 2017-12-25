@@ -254,14 +254,15 @@ void startChannel(int32_t channelNumber)
 
 	if (timeTablesRecieved == false)
 	{
-    	if (pthread_create(&timeParseThread, NULL, &parseTimeTables, NULL))
+    	/*if (pthread_create(&timeParseThread, NULL, &parseTimeTables, NULL))
     	{
         	printf("Error creating parse time tables task!\n");
     	}
 
 		printf("Napravio time thread!\n");
 
-		timeThreadExists = true;
+		timeThreadExists = true;*/
+		parseTimeTables();
 	}
 }
 
