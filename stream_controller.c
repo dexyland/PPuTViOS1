@@ -167,13 +167,13 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
  */
 void startChannel(int32_t channelNumber)
 {
-	if ((timeTablesRecieved == false) && (timeThreadExists == true))
+/*	if ((timeTablesRecieved == false) && (timeThreadExists == true))
 	{
 		printf("PREKIDAM nit!\n");
 		pthread_cancel(timeParseThread);
 		timeThreadExists = false;
 	}
-
+*/
     /* free PAT table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
     

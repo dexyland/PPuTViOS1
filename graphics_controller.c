@@ -248,7 +248,7 @@ void* renderThread()
 
 			sprintf(tempString, "RADIO");
 
-			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 25, screenHeight/2, DSTF_LEFT));
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 50, screenHeight/2, DSTF_LEFT));
 		}
 
 		if (componentsToDraw.showInfo)
