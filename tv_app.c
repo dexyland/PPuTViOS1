@@ -34,6 +34,7 @@ static void registerProgramType(int16_t type);
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
+static void delayShowInfo();
 
 static int32_t keysPressed = 0;
 static int32_t keys[3];
@@ -43,6 +44,11 @@ static struct itimerspec timerSpec;
 static struct itimerspec timerSpecOld;
 static struct sigevent signalEvent;
 static int32_t timerFlags = 0;
+
+static timer_t showInfoTimer;
+static struct itimerspec infoTimerSpec;
+static struct itimerspec intoTimerSpecOld;
+static struct sigevent infoSignalEvent;
 
 static TimeStructure startTime;
 static bool timeRecieved = false;
@@ -61,6 +67,16 @@ int main(int argc, char *argv[])
 	memset(&timerSpec, 0, sizeof(timerSpec));
 	timerSpec.it_value.tv_sec = 2;
 	timerSpec.it_value.tv_nsec = 0;
+
+	infoSignalEvent.sigev_notify = SIGEV_THREAD;
+	infoSignalEvent.sigev_notify_function = delayShowInfo;
+	infoSignalEvent.sigev_value.sival_ptr = NULL;
+	infoSignalEvent.sigev_notify_attributes = NULL;
+	timer_create(CLOCK_REALTIME, &infoSignalEvent, &showInfoTimer);
+
+	memset(&infoTimerSpec, 0, sizeof(infoTimerSpec));
+	infoTimerSpec.it_value.tv_sec = 3;
+	infoTimerSpec.it_value.tv_nsec = 0;
 
 	currentTime.hours = 30;
 
@@ -113,6 +129,7 @@ int main(int argc, char *argv[])
     ERRORCHECK(streamControllerDeinit());
 
 	timer_delete(keyTimer);
+	timer_delete(showInfoTimer);
 
     return 0;
 }
@@ -132,23 +149,15 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
                 printf("**********************************************************\n");
             }
 			printCurrentTime();
-			drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid);
+			drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber);
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
             channelUp();
-			if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
-            {
-				drawProgramNumber(channelInfo.programNumber);
-			}
 			break;
 		case KEYCODE_P_MINUS:
 		    printf("\nCH- pressed\n");
             channelDown();
-			if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
-            {
-				drawProgramNumber(channelInfo.programNumber);
-			}
 			break;
 		case KEYCODE_V_PLUS:
 			printf("\nV+ pressed\n");
@@ -343,12 +352,30 @@ void registerCurrentVolume(uint8_t volumeValue)
 
 void registerProgramType(int16_t type)
 {
+	if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
+    {
+    	printf("\n********************* Channel info *********************\n");
+        printf("Program number: %d\n", channelInfo.programNumber);
+        printf("Audio pid: %d\n", channelInfo.audioPid);
+        printf("Video pid: %d\n", channelInfo.videoPid);
+        printf("**********************************************************\n");
+    }
+
+	printCurrentTime();
+	
 	if (type == -1)
 	{
 		setRadioLogo();
+		drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber);
 	}
 	else
 	{
 		removeRadioLogo();
+		timer_settime(showInfoTimer, timerFlags, &infoTimerSpec, &intoTimerSpecOld);
 	}
+}
+
+void delayShowInfo()
+{
+	drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber);
 }

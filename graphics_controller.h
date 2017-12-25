@@ -62,7 +62,7 @@ void drawVolumeBar(uint8_t volumeValue);
  *
  * @return graphics controller error code
  */
-void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid);
+void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, int16_t programNumber);
 
 void channelDial(int32_t keysPressed, int32_t keys[]);
 

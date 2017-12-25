@@ -24,6 +24,7 @@ static int16_t programNumber = 0;
 static ChannelInfo currentChannel;
 static bool isInitialized = false;
 static bool timeTablesRecieved = false;
+static bool timeThreadExists = false;
 
 static TimeCallback timeRecievedCallback = NULL;
 static VolumeCallback volumeReportCallback = NULL;
@@ -34,12 +35,13 @@ static struct timeval now;
 static pthread_t scThread;
 static pthread_cond_t demuxCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t demuxMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_t timeParseThread;
 
 static void* streamControllerTask();
 static void removeWhiteSpaces(char* string);
 static void startChannel(int32_t channelNumber);
 static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo);
-static StreamControllerError parseTimeTables();
+static void* parseTimeTables();
 
 static InitialInfo configFile;
 static TimeStructure startTime;
@@ -165,6 +167,13 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
  */
 void startChannel(int32_t channelNumber)
 {
+	if ((timeTablesRecieved == false) && (timeThreadExists == true))
+	{
+		printf("PREKIDAM nit!\n");
+		pthread_cancel(timeParseThread);
+		timeThreadExists = false;
+	}
+
     /* free PAT table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
     
@@ -245,11 +254,18 @@ void startChannel(int32_t channelNumber)
 
 	if (timeTablesRecieved == false)
 	{
-		parseTimeTables();
+    	if (pthread_create(&timeParseThread, NULL, &parseTimeTables, NULL))
+    	{
+        	printf("Error creating parse time tables task!\n");
+    	}
+
+		printf("Napravio time thread!\n");
+
+		timeThreadExists = true;
 	}
 }
 
-StreamControllerError parseTimeTables()
+void* parseTimeTables()
 {
 	struct timeval tempTime;
 
@@ -260,7 +276,7 @@ StreamControllerError parseTimeTables()
     if(Demux_Set_Filter(playerHandle, 0x0014, 0x70, &filterHandle))
 	{
 		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
-        return SC_ERROR;
+        return (void*) SC_ERROR;
 	}
 
 	/* wait for a TDT table to be parsed*/
@@ -281,7 +297,7 @@ StreamControllerError parseTimeTables()
     if(Demux_Set_Filter(playerHandle, 0x0014, 0x73, &filterHandle))
 	{
 		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
-        return SC_ERROR;
+        return (void*) SC_ERROR;
 	}
 
 	/* wait for a TDT table to be parsed*/
@@ -338,6 +354,8 @@ StreamControllerError parseTimeTables()
 	}
 
 	timeRecievedCallback(&startTime);
+
+	printf("ZAVRSIO PARSIRANJE TIME!\n");
 
 	timeTablesRecieved = true;
 }
@@ -494,8 +512,8 @@ void* streamControllerTask()
     /* set isInitialized flag */
     isInitialized = true;
 
-    pthread_mutex_lock(&initMutex);
-    pthread_cond_signal(&initCond);
+	pthread_mutex_lock(&initMutex);
+	pthread_cond_signal(&initCond);
     pthread_mutex_unlock(&initMutex);
 
     while(!threadExit)

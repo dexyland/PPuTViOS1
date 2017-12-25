@@ -253,20 +253,24 @@ void* renderThread()
 
 		if (componentsToDraw.showInfo)
 		{
-			primary->SetColor(primary, 0x00, 0x66, 0x99, 0xEF);
+			primary->SetColor(primary, 0x00, 0x66, 0x99, 0xFF);
     		primary->FillRectangle(primary, screenWidth/10 - 20, 3*screenHeight/4 - 20, 8*screenWidth/10 + 40, screenHeight/5 + 40);
-			primary->SetColor(primary, 0xB3, 0xE6, 0xFF, 0xEF);
+			primary->SetColor(primary, 0xB3, 0xE6, 0xFF, 0xFF);
     		primary->FillRectangle(primary, screenWidth/10, 3*screenHeight/4, 8*screenWidth/10, screenHeight/5);
 
 			DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xFF));
 
-			sprintf(tempString, "Video PID : %d", videoPidToDraw);
+			sprintf(tempString, "Program number : %d", componentsToDraw.programNumber);
 
 			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 40, DSTF_LEFT));
 
-			sprintf(tempString, "Audio PID : %d", audioPidToDraw);
+			sprintf(tempString, "Video PID : %d", videoPidToDraw);
 
 			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 80, DSTF_LEFT));
+
+			sprintf(tempString, "Audio PID : %d", audioPidToDraw);
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, 3*screenHeight/4 + 120, DSTF_LEFT));
 
 			if (hoursToDraw == 30)
 			{
@@ -335,7 +339,7 @@ void drawVolumeBar(uint8_t volumeValue)
 	componentsToDraw.showVolume = true;
 }
 
-void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid)
+void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, int16_t programNumber)
 {
 	timer_settime(infoTimer, timerFlags, &infoTimerSpec, &infoTimerSpecOld);
 
@@ -343,6 +347,7 @@ void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t vide
 	videoPidToDraw = videoPid;
 	hoursToDraw = hours;
 	minutesToDraw = minutes;
+	componentsToDraw.programNumber = programNumber;
 	
 	componentsToDraw.showInfo = true;
 }
