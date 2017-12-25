@@ -69,11 +69,6 @@ GraphicsControllerError graphicsControllerInit()
 
     setTimerParams();
 
-    componentsToDraw.showVolume = false;
-    componentsToDraw.showInfo = false;
-    componentsToDraw.showChannelDial = false;
-    componentsToDraw.showRadioLogo = false;
-
     /* fetch the DirectFB interface */
     if (DirectFBCreate(&dfbInterface))
     {
@@ -149,7 +144,7 @@ GraphicsControllerError graphicsControllerDeinit()
 
 void* renderThread()
 {
-    char tempString[10];
+    char tempString[20];
 
     while (!stopDrawing)
     {
@@ -205,7 +200,6 @@ void* renderThread()
                     DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, "volume_10.png", &provider));
                     break;
             }
-
 
             DFBCHECK(provider->GetSurfaceDescription(provider, &surfaceDesc));
             DFBCHECK(dfbInterface->CreateSurface(dfbInterface, &surfaceDesc, &logoSurface));
@@ -339,7 +333,7 @@ void setTimerParams()
     volumeTimerSpec.it_value.tv_sec = 3;
     volumeTimerSpec.it_value.tv_nsec = 0;
 
-    /* Setting  for info bar timer */
+    /* Settings for info bar timer */
     infoSignalEvent.sigev_notify = SIGEV_THREAD;
     infoSignalEvent.sigev_notify_function = removeInfo;
     infoSignalEvent.sigev_value.sival_ptr = NULL;

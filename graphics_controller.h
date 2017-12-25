@@ -47,25 +47,45 @@ GraphicsControllerError graphicsControllerInit();
 GraphicsControllerError graphicsControllerDeinit();
 
 /**
- * @brief Deinitializes graphics controller module
+ * @brief Initiates drawing of volume logo
  *
- * @return graphics controller error code
+ * @param [in] volumeValue - current volume value
  */
 void drawVolumeBar(uint8_t volumeValue);
 
 /**
- * @brief Deinitializes graphics controller module
+ * @brief Initiates drawing of info bar
  *
- * @return graphics controller error code
+ * @param [in] hours - current hours value
+ * @param [in] minutes - current minutes value
+ * @param [in] audioPid - current channel audio PID
+ * @param [in] videoPid - current channel video PID
+ * @param [in] programNumber - current program number
+ * @param [in] teletext - teletext available or not (-1)
  */
 void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, uint8_t programNumber, int8_t teletext);
 
+/**
+ * @brief Initiates drawing of channel number dial rectangle
+ *
+ * @param [in] keysPressed - number of digits in channel number
+ * @param [in] keys[] - array of digits in channel number
+ */
 void channelDial(uint8_t keysPressed, uint8_t keys[]);
 
+/**
+ * @brief Removes channel nubmer dial rectangle
+ */
+void removeChannelDial();
+
+/**
+ * @brief Paints filled rectangle over the screen
+ */
 void setRadioLogo();
 
+/**
+ * @brief Removes filled rectangle from the screen
+ */
 void removeRadioLogo();
-
-void removeChannelDial();
 
 #endif /* __GRAPHICS_CONTROLLER_H__ */
