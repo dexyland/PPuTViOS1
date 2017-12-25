@@ -60,9 +60,12 @@ StreamControllerError streamControllerInit()
 
 StreamControllerError streamControllerDeinit()
 {
-    pthread_mutex_lock(&initMutex);
-	pthread_cond_wait(&initCond, &initMutex);
-	pthread_mutex_unlock(&initMutex);
+	if (!isInitialized)
+	{
+	    pthread_mutex_lock(&initMutex);
+		pthread_cond_wait(&initCond, &initMutex);
+		pthread_mutex_unlock(&initMutex);
+	}
 	
     if (!isInitialized) 
     {
