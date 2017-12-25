@@ -23,9 +23,9 @@ if (x != 0)                                                                 \
     return -1;                                                              \
  }                                                                          \
 }
-void inputChannelNumber(uint16_t key);
-void changeChannel();
-void printCurrentTime();
+static void inputChannelNumber(uint16_t key);
+static void changeChannel();
+static void printCurrentTime();
 
 static void registerCurrentTime(TimeStructure* timeStructure);
 static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value);
@@ -36,23 +36,23 @@ static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
 static void delayShowInfo();
 
-static int32_t keysPressed = 0;
-static int32_t keys[3];
+static uint8_t keysPressed = 0;
+static uint8_t keys[3];
 
 static timer_t keyTimer;
 static struct itimerspec timerSpec;
 static struct itimerspec timerSpecOld;
 static struct sigevent signalEvent;
-static int32_t timerFlags = 0;
 
 static timer_t showInfoTimer;
 static struct itimerspec infoTimerSpec;
 static struct itimerspec intoTimerSpecOld;
 static struct sigevent infoSignalEvent;
+static int32_t timerFlags = 0;
 
 static TimeStructure startTime;
+static TimeStructure currentTime;
 static bool timeRecieved = false;
-TimeStructure currentTime;
 
 static uint8_t currentVolume = 5;
 

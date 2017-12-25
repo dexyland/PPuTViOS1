@@ -19,16 +19,18 @@ typedef enum _GraphicsControllerError
  */
 typedef struct _DrawComponents
 {
-	bool showProgramNumber;
-	bool showVolume;
-	bool showInfo;
-	bool showChannelDial;
-	bool showRadioLogo;
-	int32_t programNumber;
-	int32_t volume;
-	int8_t teletext;
+    bool showVolume;
+    bool showInfo;
+    bool showChannelDial;
+    bool showRadioLogo;
+    int8_t teletext;
+    uint8_t hoursToDraw;
+    uint8_t minutesToDraw;
+    uint8_t programNumber;
+    uint8_t volume;
+    int16_t audioPidToDraw;
+    int16_t videoPidToDraw;
 }DrawComponents;
-
 
 /**
  * @brief Initializes graphics controller module
@@ -49,13 +51,6 @@ GraphicsControllerError graphicsControllerDeinit();
  *
  * @return graphics controller error code
  */
-void drawProgramNumber(int16_t programNumber);
-
-/**
- * @brief Deinitializes graphics controller module
- *
- * @return graphics controller error code
- */
 void drawVolumeBar(uint8_t volumeValue);
 
 /**
@@ -63,9 +58,9 @@ void drawVolumeBar(uint8_t volumeValue);
  *
  * @return graphics controller error code
  */
-void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, int16_t programNumber, int8_t teletext);
+void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, uint8_t programNumber, int8_t teletext);
 
-void channelDial(int32_t keysPressed, int32_t keys[]);
+void channelDial(uint8_t keysPressed, uint8_t keys[]);
 
 void setRadioLogo();
 
