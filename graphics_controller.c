@@ -172,7 +172,19 @@ void* renderThread()
 	{
 		wipeScreen();
 		
-		if (componentsToDraw.showProgramNumber)
+		if (componentsToDraw.showRadioLogo == true)
+		{
+			primary->SetColor(primary, 0x66, 0x00, 0x00, 0xFF);
+    		primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
+
+			primary->SetColor(primary, 0xFF, 0xFF, 0x00, 0xEF);
+
+			sprintf(tempString, "RADIO");
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 50, screenHeight/2, DSTF_LEFT));
+		}
+
+	/*	if (componentsToDraw.showProgramNumber)
 		{
 			primary->SetColor(primary, 0x00, 0x00, 0xFF, 0xFF);
     		primary->FillRectangle(primary, screenWidth/10, screenHeight/6, 3*screenWidth/10, 2*screenHeight/6);
@@ -183,7 +195,7 @@ void* renderThread()
 
 			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/10 + 50, screenHeight/6 + 100, DSTF_LEFT));
 		}
-
+*/
 		if (componentsToDraw.showVolume)
 		{
     		/* create the image provider for the specified file */
@@ -239,18 +251,6 @@ void* renderThread()
 			DFBCHECK(primary->Blit(primary, logoSurface, NULL, screenWidth - logoWidth - 100, 50));
 		}
 
-		if (componentsToDraw.showRadioLogo == true)
-		{
-			primary->SetColor(primary, 0x66, 0x00, 0x00, 0xFF);
-    		primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
-
-			primary->SetColor(primary, 0xFF, 0xFF, 0x00, 0xEF);
-
-			sprintf(tempString, "RADIO");
-
-			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/2 - 50, screenHeight/2, DSTF_LEFT));
-		}
-
 		if (componentsToDraw.showInfo)
 		{
 			primary->SetColor(primary, 0x00, 0x66, 0x99, 0xFF);
@@ -282,6 +282,19 @@ void* renderThread()
 			}
 
 			DFBCHECK(primary->DrawString(primary, tempString, -1, screenWidth/9, screenHeight - 60, DSTF_LEFT));
+
+			if (componentsToDraw.teletext == -1)
+			{
+				primary->SetColor(primary, 0xFF, 0x00, 0x00, 0xFF);
+			}
+			else
+			{
+				primary->SetColor(primary, 0x00, 0xFF, 0x00, 0xFF);
+			}
+
+			sprintf(tempString, "teletext");
+
+			DFBCHECK(primary->DrawString(primary, tempString, -1, 7*screenWidth/9 + 40, 3*screenHeight/4 + 40, DSTF_LEFT));
 		}
 
 		if (componentsToDraw.showChannelDial)
@@ -339,7 +352,7 @@ void drawVolumeBar(uint8_t volumeValue)
 	componentsToDraw.showVolume = true;
 }
 
-void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, int16_t programNumber)
+void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t videoPid, int16_t programNumber, int8_t teletext)
 {
 	timer_settime(infoTimer, timerFlags, &infoTimerSpec, &infoTimerSpecOld);
 
@@ -348,6 +361,7 @@ void drawInfoRect(uint8_t hours, uint8_t minutes, int16_t audioPid, int16_t vide
 	hoursToDraw = hours;
 	minutesToDraw = minutes;
 	componentsToDraw.programNumber = programNumber;
+	componentsToDraw.teletext = teletext;
 	
 	componentsToDraw.showInfo = true;
 }

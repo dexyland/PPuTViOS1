@@ -196,6 +196,7 @@ void startChannel(int32_t channelNumber)
     /* get audio and video pids */
     int16_t audioPid = -1;
     int16_t videoPid = -1;
+	int8_t teletext = -1;
     uint8_t i = 0;
     for (i = 0; i < pmtTable->elementaryInfoCount; i++)
     {
@@ -209,6 +210,11 @@ void startChannel(int32_t channelNumber)
         {
             audioPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
         }
+
+		if (pmtTable->pmtElementaryInfoArray[i].elementaryPid == 0x56)
+		{
+			teletext = 1;
+		}
     }
 
     if (videoPid != -1) 
@@ -249,6 +255,7 @@ void startChannel(int32_t channelNumber)
     currentChannel.programNumber = channelNumber + 1;
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
+	currentChannel.teletext = teletext;
 
 	programType(videoPid);
 

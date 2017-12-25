@@ -149,7 +149,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
                 printf("**********************************************************\n");
             }
 			printCurrentTime();
-			drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber);
+			drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber, channelInfo.teletext);
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
@@ -366,7 +366,7 @@ void registerProgramType(int16_t type)
 	if (type == -1)
 	{
 		setRadioLogo();
-		drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber);
+		drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber, channelInfo.teletext);
 	}
 	else
 	{
@@ -377,5 +377,5 @@ void registerProgramType(int16_t type)
 
 void delayShowInfo()
 {
-	drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber);
+	drawInfoRect(currentTime.hours, currentTime.minutes, channelInfo.audioPid, channelInfo.videoPid, channelInfo.programNumber, channelInfo.teletext);
 }
