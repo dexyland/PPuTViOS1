@@ -195,6 +195,7 @@ void startChannel(int32_t channelNumber)
     int16_t videoPid = -1;
     int8_t teletext = -1;
     uint8_t i = 0;
+
     for (i = 0; i < pmtTable->elementaryInfoCount; i++)
     {
         if (((pmtTable->pmtElementaryInfoArray[i].streamType == 0x1) || (pmtTable->pmtElementaryInfoArray[i].streamType == 0x2) || (pmtTable->pmtElementaryInfoArray[i].streamType == 0x1b))
@@ -254,7 +255,15 @@ void startChannel(int32_t channelNumber)
     currentChannel.videoPid = videoPid;
     currentChannel.teletext = teletext;
 
-    programType(videoPid);
+    if (programType != NULL)
+    {
+        programType(videoPid);
+    }
+    else
+    {
+        printf("\n%s : ERROR Program type callback not registred!\n", __FUNCTION__);
+        streamControllerDeinit();
+    }
 
     if (timeTablesRecieved == false)
     {
@@ -350,7 +359,15 @@ void* parseTimeTables()
         }
     }
 
-    timeRecievedCallback(&startTime);
+    if (timeRecievedCallback != NULL)
+    {
+        timeRecievedCallback(&startTime);
+    }
+    else
+    {
+        printf("\n%s : ERROR Time callback not registred!\n", __FUNCTION__);
+        streamControllerDeinit();
+    }
 
     printf("Time tables parsed!\n");
 
@@ -525,25 +542,25 @@ void* streamControllerTask()
 
 int32_t sectionReceivedCallback(uint8_t *buffer)
 {
-    uint8_t tableId = *buffer;  
-    if(tableId==0x00)
+    uint8_t tableId = *buffer;
+
+    if (tableId==0x00)
     {
         //printf("\n%s -----PAT TABLE ARRIVED-----\n",__FUNCTION__);
         
-        if(parsePatTable(buffer,patTable)==TABLES_PARSE_OK)
+        if (parsePatTable(buffer,patTable) == TABLES_PARSE_OK)
         {
             //printPatTable(patTable);
             pthread_mutex_lock(&demuxMutex);
             pthread_cond_signal(&demuxCond);
             pthread_mutex_unlock(&demuxMutex);
-            
         }
     } 
     else if (tableId==0x02)
     {
         //printf("\n%s -----PMT TABLE ARRIVED-----\n",__FUNCTION__);
         
-        if(parsePmtTable(buffer,pmtTable)==TABLES_PARSE_OK)
+        if (parsePmtTable(buffer,pmtTable) == TABLES_PARSE_OK)
         {
             //printPmtTable(pmtTable);
             pthread_mutex_lock(&demuxMutex);
@@ -783,7 +800,15 @@ StreamControllerError volumeUp()
         printf("\n%sError changing volume", __FUNCTION__);
     }
 
-    volumeReportCallback(currentVolume);
+    if (volumeReportCallback != NULL)
+    {
+        volumeReportCallback(currentVolume);
+    }
+    else
+    {
+        printf("\n%s : ERROR Volume callback not registred!\n", __FUNCTION__);
+        streamControllerDeinit();
+    }
 
     return SC_NO_ERROR;
 }
@@ -800,19 +825,37 @@ StreamControllerError volumeDown()
         printf("\n%sError changing volume", __FUNCTION__);
     }
 
-    volumeReportCallback(currentVolume);
+    if (volumeReportCallback != NULL)
+    {
+        volumeReportCallback(currentVolume);
+    }
+    else
+    {
+        printf("\n%s : ERROR Volume callback not registred!\n", __FUNCTION__);
+        streamControllerDeinit();
+    }
 
     return SC_NO_ERROR;
 }
 
 StreamControllerError volumeMute()
 {
-    if (Player_Volume_Set(playerHandle, 0))
+    currentVolume = 0;
+
+    if (Player_Volume_Set(playerHandle, currentVolume*volumeConstant))
     {
         printf("\n%sError changing volume", __FUNCTION__);
     }
 
-    currentVolume = 0;
+    if (volumeReportCallback != NULL)
+    {
+        volumeReportCallback(currentVolume);
+    }
+    else
+    {
+        printf("\n%s : ERROR Volume callback not registred!\n", __FUNCTION__);
+        streamControllerDeinit();
+    }
 
     return SC_NO_ERROR;
 }
