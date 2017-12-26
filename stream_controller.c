@@ -2,54 +2,55 @@
 
 #define LINE_LENGTH 100          /* Max line length in config file */
 
+
+static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo);
+static void startChannel(int32_t channelNumber);
+static void removeWhiteSpaces(char* string);
+static void* streamControllerTask();
+static void* parseTimeTables();
+static int32_t sectionReceivedCallback(uint8_t *buffer);
+static int32_t tunerStatusCallback(t_LockStatus status);
+
+
 static PatTable *patTable;
 static PmtTable *pmtTable;
 static TdtTable *tdtTable;
 static TotTable *totTable;
+
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
-
 static pthread_cond_t initCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t initMutex = PTHREAD_MUTEX_INITIALIZER;
-
-static int32_t sectionReceivedCallback(uint8_t *buffer);
-static int32_t tunerStatusCallback(t_LockStatus status);
+static pthread_cond_t demuxCond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t demuxMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_t scThread;
 
 static uint32_t playerHandle = 0;
 static uint32_t sourceHandle = 0;
 static uint32_t streamHandleA = 0;
 static uint32_t streamHandleV = 0;
 static uint32_t filterHandle = 0;
-static uint8_t threadExit = 0;
-static bool changeChannel = false;
-static int16_t programNumber = 0;
-static ChannelInfo currentChannel;
-static bool isInitialized = false;
-static bool timeTablesRecieved = false;
-static bool timeThreadExists = false;
 
-static TimeCallback timeRecievedCallback = NULL;
 static VolumeCallback volumeReportCallback = NULL;
+static TimeCallback timeRecievedCallback = NULL;
 static ProgramTypeCallback programType = NULL;
+
+static bool timeTablesRecieved = false;
+static bool changeChannel = false;
+static bool isInitialized = false;
+
+static uint32_t volumeConstant = 160400000;
+static uint32_t currentVolume = 5;
+static int16_t programNumber = 0;
+static uint8_t threadExit = 0;
+
+static ChannelInfo currentChannel;
+static TimeStructure startTime;
+static InitialInfo configFile;
 
 static struct timespec lockStatusWaitTime;
 static struct timeval now;
-static pthread_t scThread;
-static pthread_cond_t demuxCond = PTHREAD_COND_INITIALIZER;
-static pthread_mutex_t demuxMutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_t timeParseThread;
 
-static void* streamControllerTask();
-static void removeWhiteSpaces(char* string);
-static void startChannel(int32_t channelNumber);
-static StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo);
-static void* parseTimeTables();
-
-static InitialInfo configFile;
-static TimeStructure startTime;
-
-static uint32_t currentVolume = 5;
-static uint32_t volumeConstant = 160400000;
 
 StreamControllerError streamControllerInit()
 {
@@ -159,6 +160,7 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
     channelInfo->programNumber = currentChannel.programNumber;
     channelInfo->audioPid = currentChannel.audioPid;
     channelInfo->videoPid = currentChannel.videoPid;
+    channelInfo->teletext = currentChannel.teletext;
     
     return SC_NO_ERROR;
 }
@@ -169,13 +171,6 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
  */
 void startChannel(int32_t channelNumber)
 {
-/*    if ((timeTablesRecieved == false) && (timeThreadExists == true))
-    {
-        printf("PREKIDAM nit!\n");
-        pthread_cancel(timeParseThread);
-        timeThreadExists = false;
-    }
-*/
     /* free PAT table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
     
@@ -263,14 +258,6 @@ void startChannel(int32_t channelNumber)
 
     if (timeTablesRecieved == false)
     {
-        /*if (pthread_create(&timeParseThread, NULL, &parseTimeTables, NULL))
-        {
-            printf("Error creating parse time tables task!\n");
-        }
-
-        printf("Napravio time thread!\n");
-
-        timeThreadExists = true;*/
         parseTimeTables();
     }
 }
@@ -365,7 +352,7 @@ void* parseTimeTables()
 
     timeRecievedCallback(&startTime);
 
-    printf("ZAVRSIO PARSIRANJE TIME!\n");
+    printf("Time tables parsed!\n");
 
     timeTablesRecieved = true;
 }
@@ -612,7 +599,6 @@ StreamControllerError loadInitialInfo(char* fileName)
 {
     if (loadConfigFile(fileName, &configFile))
     {
-        printf("ERROR loading configuration file!\n");
         return SC_ERROR;
     }
 
@@ -629,7 +615,6 @@ StreamControllerError loadConfigFile(char* filename, InitialInfo* configInfo)
 
     if ((inputFile = fopen(filename, "r")) == NULL)
     {
-        printf("Error opening init file!\n");
         return SC_ERROR;
     }
 
@@ -706,7 +691,7 @@ static void removeWhiteSpaces(char* word)
     word[k-i+1] = '\0';
 }
 
-StreamControllerError changeChannelKey(int32_t channelNumber)
+StreamControllerError changeChannelKey(uint16_t channelNumber)
 {
     if ((channelNumber > -1) && (channelNumber < patTable->serviceInfoCount))
     {

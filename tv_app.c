@@ -1,7 +1,7 @@
+#include <signal.h>
 #include "remote_controller.h"
 #include "stream_controller.h"
 #include "graphics_controller.h"
-#include <signal.h>
 
 static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
 {
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     timer_create(CLOCK_REALTIME, &infoSignalEvent, &showInfoTimer);
 
     memset(&infoTimerSpec, 0, sizeof(infoTimerSpec));
-    infoTimerSpec.it_value.tv_sec = 3;
+    infoTimerSpec.it_value.tv_sec = 3.5;
     infoTimerSpec.it_value.tv_nsec = 0;
 
     currentTime.hours = 30;
@@ -236,7 +236,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
             inputChannelNumber(0);
             break;
         default:
-            printf("\nPress P+, P-, info or exit! \n\n");
+            printf("\nPress P+, P-,V+, V-, mute, number, info or exit! \n\n");
     }
 }
 
@@ -265,18 +265,13 @@ void inputChannelNumber(uint8_t key)
         keys[2] = 0;
     }
 
-    timer_settime(keyTimer, timerFlags, &timerSpec, &timerSpecOld);
+    timer_settime(keyTimer, timerFlags, &keyTimerSpec, &keyTimerSpecOld);
     channelDial(keysPressed, keys);
-
-    printf("\nKeyOne: %d\n", keys[0]);
-    printf("KeyTwo: %d\n", keys[1]);
-    printf("KeyThree: %d\n", keys[2]);
-    printf("\nKeypressed: %d\n", keysPressed);
 }
 
 void changeChannel()
 {
-    int32_t channel;
+    uint16_t channel;
 
     if (keysPressed == 1)
     {

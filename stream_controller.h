@@ -34,7 +34,7 @@ typedef struct _ChannelInfo
 }ChannelInfo;
 
 /**
- * @brief Structure that holds initial info
+ * @brief Structure that defines initial info
  */
 typedef struct _InitialInfo
 {
@@ -155,27 +155,36 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
  * @brief Loads config.ini file holding initial configuration
  *
  * @param [in] fileName - name of file to be loaded
- * @return stream conotroller error code
+ * @return stream controller error code
  */
 StreamControllerError loadInitialInfo(char fileName[]);
 
 /**
  * @brief changes current program to channelNumber
+ *
+ * @param [in] channelNumber - number of channel to change to
+ * @return stream controller error code
  */
-StreamControllerError changeChannelKey(int32_t channelNumber);
+StreamControllerError changeChannelKey(uint16_t channelNumber);
 
 /**
  * @brief Increases current volume value
+ *
+ * @return stream controller error code
  */
 StreamControllerError volumeUp();
 
 /**
  * @brief Decreases current volume value
+ *
+ * @return stream controller error code
  */
 StreamControllerError volumeDown();
 
 /**
  * @brief Sets current volume value to zero
+ *
+ * @return stream controller error code
  */
 StreamControllerError volumeMute();
 
