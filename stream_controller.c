@@ -160,7 +160,6 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
     channelInfo->programNumber = currentChannel.programNumber;
     channelInfo->audioPid = currentChannel.audioPid;
     channelInfo->videoPid = currentChannel.videoPid;
-    channelInfo->teletext = currentChannel.teletext;
     
     return SC_NO_ERROR;
 }
